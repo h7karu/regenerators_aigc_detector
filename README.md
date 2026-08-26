@@ -23,9 +23,13 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 you should see your terminal change from
-zecha@zlaptop:~/Hackathons/TikTokTechJam26/regenerators_aigc_detector$ 
+```
+zecha@zlaptop:~/Hackathons/TikTokTechJam26/regenerators_aigc_detector$
+``` 
 to:
+```
 (venv) zecha@zlaptop:~/Hackathons/TikTokTechJam26/regenerators_aigc_detector$ 
+```
 which means ur inside the virtual environment (wtv that means)
 
 3. install required packages
