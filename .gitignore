@@ -1,0 +1,84 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Installer logs
+pip-log.txt
+
+# Pytest
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# VSCode
+.vscode/
+
+# IDEs
+.idea/
+
+# Data, models and outputs
+/data/
+/datasets/
+/raw_data/
+/processed_data/
+/annotations/
+/labels/
+/models/
+/checkpoints/
+/weights/
+/outputs/
+/results/
+/predictions/
+
+# Large binary files
+*.h5
+*.pt
+*.pth
+*.ckpt
+*.tflite
+*.onnx
+
+# Logs and experiment tracking
+logs/
+tensorboard/
+tb_logs/
+wandb/
+mlruns/
+
+# Images and binaries
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.tif
+*.tiff
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+.env.*
+secret_*/
+
+# OneDrive / Office temp
+~$*
