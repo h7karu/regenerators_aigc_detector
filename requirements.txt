@@ -31,3 +31,16 @@ traitlets==5.16.1
 typing_extensions==4.16.0
 urllib3==2.7.0
 webencodings==0.6.1
+
+# AIGC detector pipeline (unpinned: let pip resolve current compatible builds)
+datasets
+joblib
+numpy
+pandas
+Pillow
+pyarrow
+scikit-learn
+tabulate
+torch
+torchvision
+transformers
