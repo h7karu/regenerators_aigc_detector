@@ -57,6 +57,42 @@ settings it will be tested on.
 | [aigc_detector/data/](aigc_detector/data/) | Dataset loaders and subset downloaders |
 | [scripts/](scripts/) | One download script per dataset |
 
+## Quickstart (first time pulling this repo)
+
+`data/`, `models/`, and `demo_images/` are all gitignored — a fresh pull gives
+you code only. Run these in order from the repo root:
+
+```bash
+# 1. Virtual environment
+python3 -m venv venv
+source venv/bin/activate          # (venv) should now prefix your prompt
+
+# 2. Dependencies
+pip install -r requirements.txt
+
+# 3. Datasets — add your Kaggle .env first (see step 3 below for details)
+chmod +x scripts/*.sh
+./scripts/download_cifake.sh
+./scripts/download_sid_set.sh
+./scripts/download_wildfake.sh
+
+# 4. Train a model — this is what the notebook and infer/evaluate expect to find
+python -m aigc_detector.train \
+    --data-dir data/cifake/train \
+    --data-dir data/wildfake/train \
+    --data-dir data/sid_set/train \
+    --max-per-class 150 --augment-copies 2 \
+    --output models/notebook_dual_branch.joblib
+
+# 5. Open the notebook
+jupyter notebook notebooks/aigc_detector_walkthrough.ipynb
+# Run cells top to bottom. The "try it yourself" cells near the end need
+# MODEL_PATH pointed at models/notebook_dual_branch.joblib (already the default).
+```
+
+That's the whole path from a clean pull to a working notebook. Details on each
+step (dataset sizes, flags, what gets written where) are below.
+
 ## Setup and installation instructions
 
 ### 1. Get the repo and the virtual environment
