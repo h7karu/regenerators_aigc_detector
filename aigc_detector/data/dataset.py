@@ -1,6 +1,7 @@
 """Dataset loaders: labeled CIFAKE splits for train/eval, unlabeled dirs for inference."""
 from __future__ import annotations
 
+import random
 from pathlib import Path
 from typing import Callable
 
@@ -24,13 +25,20 @@ class CIFAKEDataset(Dataset):
         split_dir: str | Path,
         transform: Callable[[Image.Image], Image.Image] | None = None,
         max_per_class: int | None = None,
+        seed: int = 42,
     ):
         split_dir = Path(split_dir)
         real_paths = list_images(split_dir / "REAL")
         fake_paths = list_images(split_dir / "FAKE")
         if max_per_class is not None:
-            real_paths = real_paths[:max_per_class]
-            fake_paths = fake_paths[:max_per_class]
+            # A plain paths[:max_per_class] silently starves whichever source
+            # sorts last: our multi-source folders (e.g. WildFake's
+            # ddim_/ddpm_/vqdm_ prefixes) are alphabetically grouped by source,
+            # so capping the sorted list can drop an entire generator family
+            # from training rather than sampling evenly across all of them.
+            # Shuffle deterministically first so the cap draws from everywhere.
+            real_paths = random.Random(seed).sample(real_paths, min(max_per_class, len(real_paths)))
+            fake_paths = random.Random(seed + 1).sample(fake_paths, min(max_per_class, len(fake_paths)))
 
         self.samples: list[tuple[Path, int]] = [(p, 0) for p in real_paths] + [
             (p, 1) for p in fake_paths
