@@ -19,6 +19,7 @@ the .env file contains super secret API keys and SHOULD NOT BE PUSHED
 in the terminal:
 ```
 sudo apt install python3-venv
+python3 -m venv venv
 source venv/bin/activate
 ```
 you should see your terminal change from
@@ -30,7 +31,7 @@ which means ur inside the virtual environment (wtv that means)
 3. install required packages
 in your terminal:
 ```
-pip install
+pip install -r requirements.txt
 ```
 pip install will look at requirements.txt and install all required packages.
 requirements.txt may be updated in the future when new packages are needed. if so, u can just run pip install again
