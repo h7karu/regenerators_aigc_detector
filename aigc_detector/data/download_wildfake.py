@@ -103,19 +103,40 @@ def collect_from_archive(
 
 
 def gather(
-    sources: dict, keys: list[str], per_class: int, seed: int, normalize: bool = True
-) -> list[tuple[str, bytes]]:
-    """Pull roughly `per_class` images spread evenly across the chosen sources."""
-    items: list[tuple[str, bytes]] = []
+    sources: dict,
+    keys: list[str],
+    per_class: int,
+    seed: int,
+    test_fraction: float,
+    normalize: bool = True,
+) -> tuple[list[tuple[str, bytes]], list[tuple[str, bytes]]]:
+    """Pull roughly `per_class` images spread evenly across the chosen sources.
+
+    Splits each source into train/test *before* merging across sources. Doing
+    the split on the merged list instead (as an earlier version of this script
+    did) puts whole sources entirely on one side: sources are fetched one
+    archive at a time and appended as contiguous blocks, so a flat train/test
+    cut just slices off the last block(s) wholesale (e.g. the WildFake test
+    split ended up 100% celebahq for REAL and 100% VQDM for FAKE). Splitting
+    per-source keeps every source represented in both splits.
+    """
+    train_items: list[tuple[str, bytes]] = []
+    test_items: list[tuple[str, bytes]] = []
     n_each = max(1, per_class // len(keys))
+    n_collected = 0
     for i, key in enumerate(keys):
         archive_path, prefix, tag = sources[key]
         # Give the last source any remainder so totals land on `per_class`.
-        want = per_class - len(items) if i == len(keys) - 1 else n_each
+        want = per_class - n_collected if i == len(keys) - 1 else n_each
         if want <= 0:
             break
-        items.extend(collect_from_archive(archive_path, prefix, tag, want, seed, normalize))
-    return items
+        source_items = collect_from_archive(archive_path, prefix, tag, want, seed, normalize)
+        n_collected += len(source_items)
+
+        n_train, _ = split_counts(len(source_items), test_fraction)
+        train_items.extend(source_items[:n_train])
+        test_items.extend(source_items[n_train:])
+    return train_items, test_items
 
 
 def parse_args() -> argparse.Namespace:
@@ -156,13 +177,14 @@ def main() -> None:
     ):
         name = "REAL" if label == 0 else "FAKE"
         print(f"[{name}]")
-        items = gather(sources, keys, args.per_class, args.seed, not args.no_normalize)
+        train_items, test_items = gather(
+            sources, keys, args.per_class, args.seed, args.test_fraction, not args.no_normalize
+        )
 
-        n_train, _ = split_counts(len(items), args.test_fraction)
-        for i, (filename, payload) in enumerate(items):
-            split = "train" if i < n_train else "test"
-            write_bytes(target_dir(args.data_root, args.dataset_name, split, label), filename, payload)
-        print(f"  wrote {len(items)} {name} images\n")
+        for split, split_items in (("train", train_items), ("test", test_items)):
+            for filename, payload in split_items:
+                write_bytes(target_dir(args.data_root, args.dataset_name, split, label), filename, payload)
+        print(f"  wrote {len(train_items)} train + {len(test_items)} test {name} images\n")
 
     summarize(args.data_root, args.dataset_name)
     print(
