@@ -262,6 +262,49 @@ modest so a laptop does not fill up. Check what you have at any time with
 
 ## Steps to reproduce the results
 
+### Run the local Gradio interface
+
+On Windows, reproduce the UI environment from the pinned lock file:
+
+```powershell
+.\setup_ui.cmd
+```
+
+If the checkpoint does not exist, download CIFAKE and reproduce the small demo
+checkpoint with the same seed, sample cap, and augmentation settings:
+
+```powershell
+.\train_demo_model.cmd
+```
+
+You can also ask setup to train a missing checkpoint automatically:
+
+```powershell
+.\setup_ui.cmd -TrainModel
+```
+
+Verify that Gradio can load the expected dual-branch checkpoint:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\verify_ui.py
+```
+
+Then launch the detector UI:
+
+```powershell
+.\run_ui.cmd
+```
+
+Or run it directly without activating the virtual environment:
+
+```powershell
+.\.venv\Scripts\python.exe app.py
+```
+
+The app normally opens at `http://127.0.0.1:7860`; if that port is busy,
+Gradio selects another available port and prints its address. Set
+`AIGC_CHECKPOINT` to use a different checkpoint path.
+
 ### Train
 
 ```bash

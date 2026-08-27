@@ -34,10 +34,12 @@ webencodings==0.6.1
 
 # AIGC detector pipeline (unpinned: let pip resolve current compatible builds)
 datasets
+gradio
 joblib
 numpy
 pandas
 Pillow
+pip
 pyarrow
 scikit-learn
 tabulate
