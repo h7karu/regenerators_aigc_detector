@@ -70,7 +70,8 @@ source venv/bin/activate          # (venv) should now prefix your prompt
 # 2. Dependencies
 pip install -r requirements.txt
 
-# 3. Datasets — add your Kaggle .env first (see step 3 below for details)
+# 3. Datasets — set up your Kaggle API token first (see step 3 below for details;
+#    no Kaggle account? skip download_cifake.sh, see "No Kaggle account?" below)
 chmod +x scripts/*.sh
 ./scripts/download_cifake.sh
 ./scripts/download_sid_set.sh
@@ -100,9 +101,6 @@ step (dataset sizes, flags, what gets written where) are below.
 ```
 git pull origin main
 ```
-
-Add the `.env` file to the repo root. It holds the Kaggle API credentials used by
-the CIFAKE download and **must not be committed** (it is already gitignored).
 
 Set up the virtual environment. On WSL/Ubuntu you may first need
 `sudo apt install python3-venv`:
@@ -135,6 +133,25 @@ The two large datasets are only ever fetched as **small subsets**. SID_Set is
 thing: they use HTTP range requests to pull just the individual images they need
 (a few hundred MB for SID_Set, a few MB for WildFake).
 
+**CIFAKE needs a Kaggle API token; the other two need nothing.** SID_Set and
+WildFake are fetched over anonymous HTTP range requests, so they work straight
+from a clean pull. For CIFAKE, authenticate as yourself — no credential is
+shipped with this repo:
+
+1. Sign in at [kaggle.com](https://www.kaggle.com), then go to your profile →
+   **Settings** → **API** → **Create New Token**. This downloads `kaggle.json`.
+2. Put it where the Kaggle CLI looks for it, and lock down the permissions:
+
+```bash
+mkdir -p ~/.kaggle && mv ~/Downloads/kaggle.json ~/.kaggle/
+chmod 600 ~/.kaggle/kaggle.json
+```
+
+Verify it works with `kaggle datasets list -s cifake`. (A `.env` file in the
+repo root does **not** work — nothing in this project or in the Kaggle CLI reads
+one. If you would rather not write the file, export `KAGGLE_USERNAME` and
+`KAGGLE_KEY` in your shell instead; the CLI picks those up too.)
+
 ```bash
 # CIFAKE — the full dataset (~100k images), via the Kaggle API
 chmod +x scripts/*.sh
@@ -151,6 +168,41 @@ chmod +x scripts/*.sh
 # The organisers' reserved demo benchmark — EVALUATION ONLY, never train on this
 ./scripts/download_wildfake_benchmark.sh
 ```
+
+#### No Kaggle account? Skip CIFAKE
+
+CIFAKE is the only dataset behind a credential. If you would rather not create a
+Kaggle token, skip step 3 and `download_cifake.sh` entirely — the pipeline runs
+end to end on the other two, which need no credentials at all:
+
+```bash
+./scripts/download_sid_set.sh
+./scripts/download_wildfake.sh
+
+python -m aigc_detector.train \
+    --data-dir data/wildfake/train \
+    --data-dir data/sid_set/train \
+    --max-per-class 150 --augment-copies 2 \
+    --output models/notebook_dual_branch.joblib
+```
+
+`--data-dir` is repeatable and every dataset lands in the same layout, so
+dropping one is just dropping its line.
+
+The notebook needs **one** edit: in the evaluation cell, change
+
+```python
+EVAL_DATASET = "cifake"   ->   EVAL_DATASET = "wildfake"
+```
+
+That variable is set once and reused by the evaluation, ablation, and error-
+analysis cells, so the single change carries through all of them. Everything
+else adapts on its own — the inventory and training cells already skip datasets
+that are not present, and `evaluate.py` / `infer.py` take explicit paths.
+
+You are training on less data, so expect somewhat weaker numbers than the
+reported ones; raise `--per-class` on the two download scripts to close some of
+that gap.
 
 Each script writes the same folder layout, so everything downstream treats them
 identically:
