@@ -62,6 +62,7 @@ settings it will be tested on.
 `data/`, `models/`, and `demo_images/` are all gitignored — a fresh pull gives
 you code only. Run these in order from the repo root:
 
+**Macs/Linux**:
 ```bash
 # 1. Virtual environment
 python3 -m venv venv
@@ -83,6 +84,37 @@ python -m aigc_detector.train \
     --data-dir data/wildfake/train \
     --data-dir data/sid_set/train \
     --max-per-class 150 --augment-copies 2 \
+    --output models/notebook_dual_branch.joblib
+
+# 5. Open the notebook
+jupyter notebook notebooks/aigc_detector_walkthrough.ipynb
+# Run cells top to bottom. The "try it yourself" cells near the end need
+# MODEL_PATH pointed at models/notebook_dual_branch.joblib (already the default).
+```
+
+**Windows**:
+```powershell
+# 1. Virtual environment
+python -m venv venv
+.\venv\Scripts\Activate.ps1       # (venv) should now prefix your prompt
+
+# 2. Dependencies
+pip install -r requirements.txt
+
+# 3. Datasets — set up your Kaggle API token first (see step 3 below for details;
+#    no Kaggle account? skip the kaggle.exe line below)
+.\venv\Scripts\kaggle.exe datasets download `
+  birdy654/cifake-real-and-ai-generated-synthetic-images `
+  -p data/cifake --unzip
+.\venv\Scripts\python.exe -m aigc_detector.data.download_sid_set
+.\venv\Scripts\python.exe -m aigc_detector.data.download_wildfake
+
+# 4. Train a model — this is what the notebook and infer/evaluate expect to find
+.\venv\Scripts\python.exe -m aigc_detector.train `
+    --data-dir data/cifake/train `
+    --data-dir data/wildfake/train `
+    --data-dir data/sid_set/train `
+    --max-per-class 150 --augment-copies 2 `
     --output models/notebook_dual_branch.joblib
 
 # 5. Open the notebook
