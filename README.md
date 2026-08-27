@@ -1,4 +1,5 @@
 # regenerators_aigc_detector
+
 This repository contains team regenerator's Artificial Intelligence Generated Content (AIGC) detector for TikTok TechJam 2026.
 
 ## Project overview
@@ -20,7 +21,7 @@ image ──┬──> frozen CLIP ViT-B/32 ─────> 512-d semantic embe
 
 - **Semantic branch (CLIP).** A frozen, large-scale-pretrained vision encoder.
   Its features are stable under exactly the degradations we are scored on, but
-  CLIP was trained to match images to captions, so it is tuned for *content* and
+  CLIP was trained to match images to captions, so it is tuned for _content_ and
   tends to smooth away the fine detail that betrays a generator.
 - **Forensic branch.** Fixed, untrained signal-processing descriptors that throw
   away content and keep the artifact statistics: the radially-averaged FFT power
@@ -46,22 +47,27 @@ settings it will be tested on.
 
 ### Repo layout
 
-| Path | What it is |
-|---|---|
-| [aigc_detector/train.py](aigc_detector/train.py) | Train the detector |
-| [aigc_detector/infer.py](aigc_detector/infer.py) | Score an image directory → JSON |
-| [aigc_detector/evaluate.py](aigc_detector/evaluate.py) | Robustness table + error analysis |
-| [aigc_detector/models/dual_branch.py](aigc_detector/models/dual_branch.py) | The fusion model |
-| [aigc_detector/features/forensic.py](aigc_detector/features/forensic.py) | Frequency / noise-residual branch |
-| [aigc_detector/data/transforms.py](aigc_detector/data/transforms.py) | Robustness transforms + train-time augmentation |
-| [aigc_detector/data/](aigc_detector/data/) | Dataset loaders and subset downloaders |
-| [scripts/](scripts/) | One download script per dataset |
+| Path                                                                       | What it is                                      |
+| -------------------------------------------------------------------------- | ----------------------------------------------- |
+| [aigc_detector/train.py](aigc_detector/train.py)                           | Train the detector                              |
+| [aigc_detector/infer.py](aigc_detector/infer.py)                           | Score an image directory → JSON                 |
+| [aigc_detector/evaluate.py](aigc_detector/evaluate.py)                     | Robustness table + error analysis               |
+| [aigc_detector/models/dual_branch.py](aigc_detector/models/dual_branch.py) | The fusion model                                |
+| [aigc_detector/features/forensic.py](aigc_detector/features/forensic.py)   | Frequency / noise-residual branch               |
+| [aigc_detector/data/transforms.py](aigc_detector/data/transforms.py)       | Robustness transforms + train-time augmentation |
+| [aigc_detector/data/](aigc_detector/data/)                                 | Dataset loaders and subset downloaders          |
+| [scripts/](scripts/)                                                       | One download script per dataset                 |
 
 ## Quickstart (first time pulling this repo)
 
-`data/`, `models/`, and `demo_images/` are all gitignored — a fresh pull gives
-you code only. Run these in order from the repo root:
+`data/`, `models/`, and `demo_images/` are all gitignored — a fresh pull gives you code only. 
+Add the `.env` file to the repo root. It holds the Kaggle API credentials used by
+the CIFAKE download and **must not be committed** (it is already gitignored).
 
+Run these in order from the repo root:
+
+
+**Macs/Linux**:
 ```bash
 # 1. Virtual environment
 python3 -m venv venv
@@ -90,6 +96,35 @@ jupyter notebook notebooks/aigc_detector_walkthrough.ipynb
 # MODEL_PATH pointed at models/notebook_dual_branch.joblib (already the default).
 ```
 
+**Windows**:
+```bash
+# 1. Virtual environment
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+
+# 2. Dependencies
+pip install -r requirements.txt
+
+# 3. Datasets (using your direct executable calls)
+.\venv\Scripts\kaggle.exe datasets download `
+  birdy654/cifake-real-and-ai-generated-synthetic-images `
+  -p data/cifake --unzip
+
+.\venv\Scripts\python.exe -m aigc_detector.data.download_sid_set
+.\venv\Scripts\python.exe -m aigc_detector.data.download_wildfake
+
+# 4. Train a model
+.\venv\Scripts\python.exe -m aigc_detector.train `
+    --data-dir data/cifake/train `
+    --data-dir data/wildfake/train `
+    --data-dir data/sid_set/train `
+    --max-per-class 150 --augment-copies 2 `
+    --output models/notebook_dual_branch.joblib
+
+# 5. Open the notebook
+jupyter notebook notebooks/aigc_detector_walkthrough.ipynb
+```
+
 That's the whole path from a clean pull to a working notebook. Details on each
 step (dataset sizes, flags, what gets written where) are below.
 
@@ -101,8 +136,7 @@ step (dataset sizes, flags, what gets written where) are below.
 git pull origin main
 ```
 
-Add the `.env` file to the repo root. It holds the Kaggle API credentials used by
-the CIFAKE download and **must not be committed** (it is already gitignored).
+Add the `.env` file to the repo root. It holds the Kaggle API credentials used by the CIFAKE download and **must not be committed** (it is already gitignored).
 
 Set up the virtual environment. On WSL/Ubuntu you may first need
 `sudo apt install python3-venv`:
@@ -112,8 +146,7 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-Your prompt should now be prefixed with `(venv)`, which means you are inside the
-virtual environment.
+Your prompt should now be prefixed with `(venv)`, which means you are inside the virtual environment.
 
 ### 2. Install the packages
 
@@ -195,12 +228,12 @@ python -m aigc_detector.train \
 
 Useful flags:
 
-| Flag | Default | Why you'd change it |
-|---|---|---|
-| `--max-per-class N` | all | Cap source images per class. Start small. |
-| `--augment-copies N` | `2` | Degraded copies per image. `0` disables augmentation. |
-| `--branches` | `clip forensic` | Use one branch alone for ablations. |
-| `--head` | `logreg` | `mlp` for a non-linear fusion head. |
+| Flag                 | Default         | Why you'd change it                                   |
+| -------------------- | --------------- | ----------------------------------------------------- |
+| `--max-per-class N`  | all             | Cap source images per class. Start small.             |
+| `--augment-copies N` | `2`             | Degraded copies per image. `0` disables augmentation. |
+| `--branches`         | `clip forensic` | Use one branch alone for ablations.                   |
+| `--head`             | `logreg`        | `mlp` for a non-linear fusion head.                   |
 
 Training cost scales as `images × (1 + augment-copies)`, so `--max-per-class
 1000 --augment-copies 2` means 6000 feature extractions.
@@ -219,8 +252,8 @@ AI-generated:
 
 ```json
 [
-  {"image_path": "path/to/images/a.jpg", "pred": 0.9412},
-  {"image_path": "path/to/images/b.jpg", "pred": 0.0317}
+  { "image_path": "path/to/images/a.jpg", "pred": 0.9412 },
+  { "image_path": "path/to/images/b.jpg", "pred": 0.0317 }
 ]
 ```
 
@@ -306,4 +339,5 @@ done
    bottlenecked through a single 224×224 resize.
 
 ## Contribution
+
 Team member contributions (if applicable, i.e. team participants, non-solo participants)
