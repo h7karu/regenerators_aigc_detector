@@ -46,6 +46,12 @@ from repo root directory:
 chmod +x scripts/download_cifake.sh
 ./scripts/download_cifake.sh
 ```
+If you see `cannot execute: required file not found` on WSL, the script may have Windows (CRLF) line endings. 
+Run the command below before trying again.
+
+```
+sed -i 's/\r$//' scripts/download_cifake.sh
+```
 
 data should be installed under data/cifake with its correct subfolders 
 - train
