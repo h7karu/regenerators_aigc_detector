@@ -101,7 +101,6 @@ python -m venv venv
 # If PowerShell says scripts are disabled, run this once for the current terminal only, then repeat the activation command above:
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
-
 # 2. Dependencies
 pip install -r requirements.txt
 
@@ -112,6 +111,12 @@ pip install -r requirements.txt
   -p data/cifake --unzip
 .\venv\Scripts\python.exe -m aigc_detector.data.download_sid_set
 .\venv\Scripts\python.exe -m aigc_detector.data.download_wildfake
+
+# If you see cannot execute: required file not found on WSL, the script may have Windows (CRLF) line endings. 
+# Run the commands below before trying again.
+sed -i 's/\r$//' scripts/download_cifake.sh
+sed -i 's/\r$//' scripts/download_sid_set.sh
+sed -i 's/\r$//' scripts/download_wildfake.sh
 
 # 4. Train a model — this is what the notebook and infer/evaluate expect to find
 .\venv\Scripts\python.exe -m aigc_detector.train `
