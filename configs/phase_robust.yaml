@@ -1,0 +1,39 @@
+seed: 42
+
+data:
+  root: cifake-real-and-ai-generated-synthetic-images
+  train_manifest: data/manifests/cifake_train.csv
+  val_manifest: data/manifests/cifake_val.csv
+  test_manifest: data/manifests/cifake_test.csv
+  image_size: 224
+  num_workers: 0
+  balanced_sampling: true
+  sampling_columns: [label, dataset, generator]
+
+model:
+  backbone: swin_tiny_patch4_window7_224.ms_in1k
+  pretrained: true
+  dropout: 0.2
+  cache_dir: models
+  use_phase: true
+  phase_base_channels: 32
+
+training:
+  epochs: 15
+  batch_size: 16
+  backbone_lr: 0.00002
+  head_lr: 0.0003
+  weight_decay: 0.05
+  gradient_clip: 1.0
+  warmup_epochs: 1
+  amp: true
+  early_stopping_patience: 4
+  paired_views: true
+  consistency_weight: 0.5
+  consistency_alpha: 1.0
+  consistency_warmup_epochs: 2
+
+output:
+  checkpoint_dir: checkpoints
+  checkpoint_name: phase_robust_best.pt
+  log_dir: logs/phase_robust

@@ -8,6 +8,7 @@ __pycache__/
 env/
 venv/
 .venv/
+.venv*/
 ENV/
 env.bak/
 venv.bak/
@@ -23,10 +24,12 @@ pip-log.txt
 
 # Pytest
 .pytest_cache/
+.test-tmp/
 
 # Jupyter Notebook
 .ipynb_checkpoints
 *.ipynb
+!notebooks/demo.ipynb
 
 # VSCode
 .vscode/
@@ -50,8 +53,10 @@ pip-log.txt
 /outputs/
 /results/
 /predictions/
+/reports/metrics/smoke_*.json
 
 # Large binary files
+*.exe
 *.h5
 *.pt
 *.pth
@@ -82,6 +87,9 @@ Thumbs.db
 .env
 .env.*
 secret_*/
+
+# Local artifact downloads and credentials
+artifacts/private/
 
 # OneDrive / Office temp
 ~$*

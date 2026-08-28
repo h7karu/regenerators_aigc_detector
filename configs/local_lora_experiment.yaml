@@ -1,0 +1,45 @@
+seed: 42
+
+data:
+  train_manifest: data/manifests/cifake_train.csv
+  val_manifest: data/manifests/cifake_val.csv
+  test_manifest: data/manifests/cifake_test.csv
+  train_limit: 5000
+  val_limit: 1000
+  image_size: 224
+  num_workers: 0
+  balanced_sampling: true
+  sampling_columns: [label, dataset, generator]
+
+model:
+  backbone: swin_tiny_patch4_window7_224.ms_in1k
+  pretrained: true
+  dropout: 0.2
+  cache_dir: models
+  use_phase: true
+  phase_base_channels: 32
+  training_mode: lora
+  lora_rank: 4
+  lora_alpha: 8
+  lora_dropout: 0.05
+  lora_targets: [attn.qkv, attn.proj]
+
+training:
+  epochs: 3
+  batch_size: 4
+  backbone_lr: 0.0001
+  head_lr: 0.0003
+  weight_decay: 0.05
+  gradient_clip: 1.0
+  warmup_epochs: 1
+  amp: false
+  early_stopping_patience: 3
+  paired_views: true
+  consistency_weight: 0.5
+  consistency_alpha: 1.0
+  consistency_warmup_epochs: 1
+
+output:
+  checkpoint_dir: checkpoints/local_lora_experiment
+  checkpoint_name: local_lora_best.pt
+  log_dir: logs/local_lora_experiment
