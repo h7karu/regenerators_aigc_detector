@@ -98,6 +98,10 @@ jupyter notebook notebooks/aigc_detector_walkthrough.ipynb
 python -m venv venv
 .\venv\Scripts\Activate.ps1       # (venv) should now prefix your prompt
 
+# If PowerShell says scripts are disabled, run this once for the current terminal only, then repeat the activation command above:
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+
 # 2. Dependencies
 pip install -r requirements.txt
 
