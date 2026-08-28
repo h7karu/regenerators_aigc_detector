@@ -136,7 +136,9 @@ def main() -> None:
 
     md_path = args.output_dir / "robustness_summary.md"
     clean_row = summary.iloc[0]
-    with open(md_path, "w") as f:
+    # with open(md_path, "w") as f: 
+    # replaced because windows default encoding is cp1252, which fails on some unicode characters in the summary table.
+    with open(md_path, "w", encoding="utf-8") as f:
         f.write("# Robustness evaluation summary\n\n")
         f.write(f"- Data: `{args.data_dir}` ({len(labels)} images)\n")
         f.write(f"- Model branches: `{'+'.join(clf.branches)}`\n")
