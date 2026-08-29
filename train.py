@@ -30,6 +30,7 @@ def build_loader(
     *,
     batch_size: int,
     num_workers: int,
+    persistent_workers: bool,
     balanced: bool,
     sampling_columns: tuple[str, ...] = ("label",),
     shuffle: bool,
@@ -49,7 +50,7 @@ def build_loader(
         sampler=sampler,
         num_workers=num_workers,
         pin_memory=device.type == "cuda",
-        persistent_workers=num_workers > 0,
+        persistent_workers=persistent_workers and num_workers > 0,
         worker_init_fn=worker_seed,
         generator=generator,
     )
@@ -127,6 +128,7 @@ def train_one_epoch(
         "total": running_total_loss / processed_samples,
         "classification": running_classification_loss / processed_samples,
         "consistency": running_consistency_loss / processed_samples,
+        "processed_samples": float(processed_samples),
     }
 
 
@@ -142,10 +144,16 @@ def main() -> None:
     parser.add_argument("--config", default="configs/rgb_baseline.yaml")
     parser.add_argument("--device", default="auto")
     parser.add_argument("--epochs", type=int)
+    parser.add_argument("--batch-size", type=int)
     parser.add_argument("--limit-train-samples", type=int)
     parser.add_argument("--limit-val-samples", type=int)
     parser.add_argument("--max-train-batches", type=int)
     parser.add_argument("--max-val-batches", type=int)
+    parser.add_argument(
+        "--resume",
+        type=str,
+        help="Resume model, optimizer, scheduler, and scaler state from a checkpoint.",
+    )
     parser.add_argument(
         "--no-pretrained",
         action="store_true",
@@ -189,8 +197,13 @@ def main() -> None:
         limit=int(validation_limit) if validation_limit is not None else None,
     )
     loader_arguments = {
-        "batch_size": int(training_config["batch_size"]),
+        "batch_size": (
+            args.batch_size
+            if args.batch_size is not None
+            else int(training_config["batch_size"])
+        ),
         "num_workers": int(data_config.get("num_workers", 0)),
+        "persistent_workers": bool(data_config.get("persistent_workers", True)),
         "device": device,
         "seed": seed,
     }
@@ -235,6 +248,29 @@ def main() -> None:
     best_auc = float("-inf")
     epochs_without_improvement = 0
     patience = int(training_config.get("early_stopping_patience", 3))
+    start_epoch = 0
+    if args.resume:
+        resume_path = resolve_project_path(args.resume)
+        checkpoint = torch.load(resume_path, map_location=device, weights_only=False)
+        model.load_state_dict(checkpoint["model_state"])
+        optimizer.load_state_dict(checkpoint["optimizer_state"])
+        scheduler.load_state_dict(checkpoint["scheduler_state"])
+        if "scaler_state" in checkpoint:
+            scaler.load_state_dict(checkpoint["scaler_state"])
+        start_epoch = int(checkpoint["epoch"]) + 1
+        best_auc = float(
+            checkpoint.get(
+                "best_validation_auc",
+                checkpoint.get("validation_metrics", {}).get("auroc", float("-inf")),
+            )
+        )
+        epochs_without_improvement = int(
+            checkpoint.get("epochs_without_improvement", 0)
+        )
+        print(
+            f"Resumed {resume_path} at epoch {start_epoch + 1} "
+            f"with best validation AUROC {best_auc:.4f}"
+        )
     print(
         f"Training on {device} | train={len(train_dataset):,} | "
         f"val={len(validation_dataset):,} | mode={model.training_mode} | "
@@ -244,8 +280,16 @@ def main() -> None:
     if model.training_mode == "lora":
         print(f"LoRA layers: {len(model.lora_layers)}")
 
-    for epoch in range(epochs):
+    if start_epoch >= epochs:
+        raise ValueError(
+            f"Checkpoint has already completed {start_epoch} epochs, "
+            f"but the run is configured for {epochs}. Increase --epochs."
+        )
+
+    for epoch in range(start_epoch, epochs):
         start_time = time.perf_counter()
+        if device.type == "cuda":
+            torch.cuda.reset_peak_memory_stats(device)
         consistency_warmup = int(
             training_config.get("consistency_warmup_epochs", 0)
         )
@@ -271,6 +315,7 @@ def main() -> None:
             consistency_weight=consistency_weight,
             consistency_alpha=float(training_config.get("consistency_alpha", 1.0)),
         )
+        training_elapsed = time.perf_counter() - start_time
         labels, probabilities, _ = collect_predictions(
             model,
             validation_loader,
@@ -303,36 +348,53 @@ def main() -> None:
                 epoch,
             )
 
+        is_best = validation_auc > best_auc
+        if is_best:
+            best_auc = validation_auc
+            epochs_without_improvement = 0
+        else:
+            epochs_without_improvement += 1
+
         checkpoint = {
             "epoch": epoch,
             "model_state": model.state_dict(),
             "optimizer_state": optimizer.state_dict(),
             "scheduler_state": scheduler.state_dict(),
+            "scaler_state": scaler.state_dict(),
             "config": config,
             "threshold": threshold,
             "validation_metrics": validation_metrics,
+            "best_validation_auc": best_auc,
+            "epochs_without_improvement": epochs_without_improvement,
             "training_mode": model.training_mode,
             "total_parameters": count_parameters(model),
             "trainable_parameters": count_parameters(model, trainable_only=True),
         }
         save_checkpoint(checkpoint, checkpoint_directory / "last.pt")
-        if validation_auc > best_auc:
-            best_auc = validation_auc
-            epochs_without_improvement = 0
+        if is_best:
             checkpoint_name = config["output"].get(
                 "checkpoint_name", "rgb_baseline_best.pt"
             )
             save_checkpoint(checkpoint, checkpoint_directory / checkpoint_name)
-        else:
-            epochs_without_improvement += 1
 
         elapsed = time.perf_counter() - start_time
+        throughput = train_losses["processed_samples"] / training_elapsed
+        memory_summary = ""
+        if device.type == "cuda":
+            peak_allocated_gib = torch.cuda.max_memory_allocated(device) / (1024**3)
+            peak_reserved_gib = torch.cuda.max_memory_reserved(device) / (1024**3)
+            memory_summary = (
+                f" peak_allocated_gib={peak_allocated_gib:.2f}"
+                f" peak_reserved_gib={peak_reserved_gib:.2f}"
+            )
         print(
             f"epoch={epoch + 1}/{epochs} loss={train_losses['total']:.4f} "
             f"cls={train_losses['classification']:.4f} "
             f"cons={train_losses['consistency']:.4f} "
             f"val_auc={validation_auc:.4f} val_f1={validation_metrics['f1']:.4f} "
-            f"threshold={threshold:.3f} seconds={elapsed:.1f}"
+            f"threshold={threshold:.3f} seconds={elapsed:.1f} "
+            f"train_seconds={training_elapsed:.1f} "
+            f"train_samples_per_second={throughput:.1f}{memory_summary}"
         )
         if epochs_without_improvement >= patience:
             print(f"Early stopping after {epoch + 1} epochs.")

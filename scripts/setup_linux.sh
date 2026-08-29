@@ -21,7 +21,10 @@ if [[ "$PYTHON_VERSION" != "3.12.14" ]]; then
   exit 1
 fi
 
-uv pip sync --python .venv/bin/python requirements-cpu-linux.lock
+uv pip install --python .venv/bin/python \
+  --index-url https://download.pytorch.org/whl/cpu \
+  torch==2.13.0+cpu torchvision==0.28.0+cpu
+uv pip install --python .venv/bin/python -r requirements.txt
 .venv/bin/python -m pip check
 .venv/bin/python scripts/verify_environment.py
 

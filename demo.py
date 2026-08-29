@@ -11,9 +11,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--checkpoint",
-        default="checkpoints/local_phase_experiment/local_phase_best.pt",
+        default="checkpoints/full_cifake_lora/full_cifake_lora_best.pt",
     )
-    parser.add_argument("--config", default="configs/local_phase_experiment.yaml")
+    parser.add_argument("--config", default="configs/full_cifake_lora.yaml")
     parser.add_argument("--device", default="auto", choices=("auto", "cpu", "cuda", "mps"))
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=7860)

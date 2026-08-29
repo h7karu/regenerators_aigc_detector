@@ -191,7 +191,7 @@ def create_demo(
             <div class="hero">
               <h1>Regenerators AI Image Detector</h1>
               <p>RGB + Fourier-phase image forensics with compression-robust training</p>
-              <p class="prototype-note">Experimental prototype · trained on a 5,000-image CIFAKE subset</p>
+              <p class="prototype-note">Experimental prototype · trained on the 90,000-image CIFAKE training split</p>
             </div>
             """
         )
@@ -206,7 +206,9 @@ def create_demo(
                     height=430,
                 )
                 with gr.Row():
-                    analyse_button = gr.Button("Analyse image", variant="primary")
+                    analyse_button = gr.Button(
+                        "Analyse image", variant="primary", interactive=False
+                    )
                     clear_button = gr.ClearButton(value="Clear")
 
             with gr.Column(scale=6):
@@ -239,7 +241,9 @@ def create_demo(
                             "and downscaling. This does not use the reserved test set."
                         )
                         robustness_button = gr.Button(
-                            "Run robustness analysis", variant="secondary"
+                            "Run robustness analysis",
+                            variant="secondary",
+                            interactive=False,
                         )
                         robustness_summary = gr.Markdown()
                         robustness_plot = gr.Plot(label="Score comparison")
@@ -263,11 +267,21 @@ def create_demo(
 - **Architecture:** Swin-Tiny RGB branch + Fourier-phase CNN with learned fusion
 - **Parameters:** {int(model_metadata['parameters']):,}
 - **Validation AUROC:** {float(model_metadata.get('validation_auroc') or 0.0):.4f}
-- **Current scope:** trained on a small CIFAKE subset; real-world and unseen-generator generalisation is not established.
+- **Current scope:** trained on CIFAKE; real-world and unseen-generator generalisation is not established.
 - **Interpretation:** pixel-only detection is supporting evidence, not definitive provenance.
                 """
             )
 
+        image_input.change(
+            fn=lambda image: (
+                gr.update(interactive=image is not None),
+                gr.update(interactive=image is not None),
+            ),
+            inputs=image_input,
+            outputs=[analyse_button, robustness_button],
+            queue=False,
+            show_progress="hidden",
+        )
         analyse_button.click(
             fn=analyse,
             inputs=image_input,
@@ -297,6 +311,8 @@ def create_demo(
                 robustness_plot,
                 robustness_table,
                 preview_gallery,
+                analyse_button,
+                robustness_button,
             ]
         )
 

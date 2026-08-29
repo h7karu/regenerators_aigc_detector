@@ -1,3 +1,0 @@
--r requirements.txt
-
-gradio==6.26.0

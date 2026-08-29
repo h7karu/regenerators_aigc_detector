@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 $projectRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
 $environmentRoot = Join-Path $projectRoot ".venv"
 $pythonExecutable = Join-Path $environmentRoot "Scripts\python.exe"
-$lockFile = Join-Path $projectRoot "requirements-cpu.lock"
+$requirementsFile = Join-Path $projectRoot "requirements.txt"
 
 $uvCommand = Get-Command uv -ErrorAction SilentlyContinue
 if (-not $uvCommand) {
@@ -33,7 +33,14 @@ if ($pythonVersion -ne "3.12.14") {
     throw "$environmentRoot uses Python $pythonVersion, expected 3.12.14. Remove that disposable environment and rerun this script."
 }
 
-& uv pip sync --python $pythonExecutable $lockFile
+& uv pip install --python $pythonExecutable `
+    --index-url https://download.pytorch.org/whl/cpu `
+    torch==2.13.0+cpu torchvision==0.28.0+cpu
+if ($LASTEXITCODE -ne 0) {
+    throw "PyTorch installation failed."
+}
+
+& uv pip install --python $pythonExecutable -r $requirementsFile
 if ($LASTEXITCODE -ne 0) {
     throw "Dependency installation failed."
 }

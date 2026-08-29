@@ -3,6 +3,26 @@
 Large datasets and model checkpoints are deliberately excluded from Git. This
 keeps the repository cloneable and prevents accidental redistribution of data.
 
+## Fully trained CIFAKE LoRA checkpoint
+
+The checkpoint used by the default demo belongs at:
+
+```text
+checkpoints/full_cifake_lora/full_cifake_lora_best.pt
+```
+
+Expected properties for the current final artifact:
+
+```text
+Size:   142703714 bytes
+SHA256: 3380ae9ff1a00ac11db2e1de018517504c4fb48bc7ecdb39ea5e19e7a5266679
+```
+
+It completed all 15 epochs configured in `configs/full_cifake_lora.yaml`.
+The selected checkpoint reached 0.9970 validation AUROC and 0.9970 AUROC on
+the untouched 20,000-image CIFAKE test split. Publish this file as a versioned
+release asset or in model storage; Git ignores `*.pt` files intentionally.
+
 ## Demo checkpoint
 
 Place the locally trained demonstration checkpoint at:

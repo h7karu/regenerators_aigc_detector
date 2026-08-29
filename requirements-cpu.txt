@@ -1,8 +1,0 @@
-# Reproducible CPU/demo environment. Compile this input to requirements-cpu.lock
-# whenever a direct dependency is intentionally changed.
---extra-index-url https://download.pytorch.org/whl/cpu
-
--r requirements-demo.txt
-
-torch==2.13.0+cpu
-torchvision==0.28.0+cpu
