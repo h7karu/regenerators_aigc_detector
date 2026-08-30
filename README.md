@@ -4,9 +4,7 @@ This repository contains team regenerator's Artificial Intelligence Generated Co
 ## Project overview
 
 The task is to tell AI-generated images from authentic ones, and to keep working
-after the image has been compressed, blurred, cropped, resized or filtered on its
-way through a social platform. Clean-data accuracy is the easy half; the score
-lives in what survives post-processing.
+after the image has been compressed, blurred, cropped, resized or filtered.
 
 Our detector is **dual-branch**. Each branch sees something the other misses:
 
