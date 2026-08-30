@@ -25,7 +25,9 @@ def analyze(image):
         raise gr.Error(str(exc)) from exc
     except Exception as exc:
         raise gr.Error(
-            "Detection failed. Confirm that the checkpoint and cached CLIP model are available."
+            "Detection failed. Check that the checkpoint at "
+            f"{CHECKPOINT} loads and that the CLIP weights can be downloaded or "
+            "are already cached."
         ) from exc
 
 
@@ -60,9 +62,10 @@ def build_demo() -> gr.Blocks:
 
         gr.Markdown(
             """
-            **Important:** This demo uses a small experimental checkpoint trained
-            on CIFAKE. Results can be wrong, especially for edited, compressed,
-            or out-of-distribution images.
+            **Important:** This demo uses a small experimental checkpoint whose
+            training data depends on which datasets you trained it on. Results can
+            be wrong -- confidently so -- especially for edited, compressed, or
+            out-of-distribution images.
             """
         )
 

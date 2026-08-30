@@ -8,9 +8,13 @@ from pathlib import Path
 
 from PIL import Image, ImageOps
 
-# The CLIP files are downloaded during setup. Avoid network checks on every run.
-os.environ.setdefault("HF_HUB_OFFLINE", "1")
-os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+# Offline mode is opt-in. Forcing it here breaks the very first run for anyone who
+# opens the UI before training, because CLIP would not be cached yet and the load
+# fails with an opaque error instead of downloading. Set AIGC_OFFLINE=1 to skip the
+# network checks once the weights are cached locally.
+if os.environ.get("AIGC_OFFLINE") == "1":
+    os.environ.setdefault("HF_HUB_OFFLINE", "1")
+    os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
 
 MAX_IMAGE_SIDE = 2048
 
