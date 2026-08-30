@@ -26,7 +26,8 @@ pip-log.txt
 
 # Jupyter Notebook
 .ipynb_checkpoints
-*.ipynb
+# Scratch notebooks stay local; notebooks/ is a submission deliverable and is tracked.
+/*.ipynb
 
 # VSCode
 .vscode/
@@ -50,6 +51,8 @@ pip-log.txt
 /outputs/
 /results/
 /predictions/
+/reports/
+*.joblib
 
 # Large binary files
 *.h5
