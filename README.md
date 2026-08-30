@@ -55,7 +55,9 @@ settings it will be tested on.
 | [aigc_detector/features/forensic.py](aigc_detector/features/forensic.py) | Frequency / noise-residual branch |
 | [aigc_detector/data/transforms.py](aigc_detector/data/transforms.py) | Robustness transforms + train-time augmentation |
 | [aigc_detector/data/](aigc_detector/data/) | Dataset loaders and subset downloaders |
-| [scripts/](scripts/) | One download script per dataset |
+| [app.py](app.py) | Gradio browser UI for scoring one image |
+| [aigc_detector/ui.py](aigc_detector/ui.py) | Inference service behind the UI |
+| [scripts/](scripts/) | Dataset downloaders, plus UI setup/launch helpers |
 
 ## Quickstart (first time pulling this repo)
 
@@ -276,6 +278,108 @@ modest so a laptop does not fill up. Check what you have at any time with
 > downloaders exclude those same images at the source.
 
 ## Steps to reproduce the results
+
+### Run the local Gradio interface
+
+A browser UI for scoring one image at a time — upload, webcam, or paste. It needs
+two things: the virtual environment from step 1–2 of the Quickstart, and a trained
+checkpoint at `models/notebook_dual_branch.joblib`.
+
+If you already followed the Quickstart, you have both, and you can skip straight
+to **Launch** below.
+
+#### Set up
+
+Creates `venv/` if it is missing and installs everything the UI needs. Safe to
+re-run.
+
+**Mac/Linux**:
+```bash
+chmod +x run_ui.sh scripts/*.sh
+./scripts/setup_ui.sh
+./scripts/setup_ui.sh --train      # also train the checkpoint if it is missing
+```
+
+**Windows**:
+```powershell
+.\setup_ui.cmd
+.\setup_ui.cmd -TrainModel         # also train the checkpoint if it is missing
+```
+
+On Windows, setup uses [uv](https://docs.astral.sh/uv/) when it is installed —
+it is faster and installs the exact pinned set from `requirements.lock`. If uv is
+not present the script falls back to stock `venv` + `pip`, so it is not required.
+
+#### Train the demo checkpoint
+
+Only needed if `models/notebook_dual_branch.joblib` does not exist yet. This
+reproduces it from CIFAKE with a fixed seed, so both platforms produce the same
+model:
+
+**Mac/Linux**:
+```bash
+./scripts/train_demo_model.sh
+```
+
+**Windows**:
+```powershell
+.\train_demo_model.cmd
+```
+
+No Kaggle token? CIFAKE is the one dataset behind a credential — train on the
+credential-free datasets instead (see "No Kaggle account?" above) and write the
+result to the same path:
+
+```bash
+python -m aigc_detector.train \
+    --data-dir data/sid_set/train \
+    --data-dir data/wildfake/train \
+    --max-per-class 150 --augment-copies 2 \
+    --output models/notebook_dual_branch.joblib
+```
+
+#### Verify
+
+Confirms Gradio is installed and the checkpoint loads with both branches:
+
+**Mac/Linux**:
+```bash
+./venv/bin/python scripts/verify_ui.py
+```
+
+**Windows**:
+```powershell
+.\venv\Scripts\python.exe scripts\verify_ui.py
+```
+
+#### Launch
+
+**Mac/Linux**:
+```bash
+./run_ui.sh
+# or, with the venv already activated:
+python app.py
+```
+
+**Windows**:
+```powershell
+.\run_ui.cmd
+# or, without activating the virtual environment:
+.\venv\Scripts\python.exe app.py
+```
+
+The app opens at `http://127.0.0.1:7860`. If that port is busy, Gradio picks
+another and prints the address.
+
+| Environment variable | What it does |
+|---|---|
+| `AIGC_CHECKPOINT` | Load a different checkpoint instead of the default path. |
+| `AIGC_OFFLINE=1` | Skip Hugging Face network checks on startup. Only set this once CLIP is cached locally — on a first run it prevents the download. |
+
+> **On reading the output.** The verdict is whichever class scores higher, and the
+> model is often extremely confident when it is wrong — a real photograph can come
+> back as AI-GENERATED at 100%. Treat it as a ranking signal, not proof, and
+> pre-select your images before demoing.
 
 ### Train
 
