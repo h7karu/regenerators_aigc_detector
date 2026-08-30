@@ -170,8 +170,8 @@ GitHub** — each person downloads them locally with these scripts. Run them fro
 the repo root.
 
 The two large datasets are only ever fetched as **small subsets**. SID_Set is
-~140 GB and WildFake is ~1.3 TB in full, so the scripts never download the whole
-thing: they use HTTP range requests to pull just the individual images they need
+~140 GB and WildFake is ~1.3 TB in full, so the scripts never download everything
+: they use HTTP range requests to pull just the individual images they need
 (a few hundred MB for SID_Set, a few MB for WildFake).
 
 **CIFAKE needs a Kaggle API token; the other two need nothing.** SID_Set and
@@ -406,7 +406,7 @@ Useful flags:
 Training cost scales as `images × (1 + augment-copies)`, so `--max-per-class
 1000 --augment-copies 2` means 6000 feature extractions.
 
-### Predict on a directory (the required deliverable)
+### Predict on a directory (under deliverable 5.5.2)
 
 ```bash
 python -m aigc_detector.infer \
@@ -415,7 +415,7 @@ python -m aigc_detector.infer \
     --output predictions.json
 ```
 
-Writes the format the brief asks for — `pred` is the confidence the image is
+Writes the format as stated in 5.5.2 for — `pred` is the confidence the image is
 AI-generated:
 
 ```json
