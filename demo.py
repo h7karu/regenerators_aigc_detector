@@ -24,7 +24,12 @@ def main() -> None:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=7860)
     parser.add_argument("--share", action="store_true")
-    parser.add_argument("--open-browser", action="store_true")
+    parser.add_argument(
+        "--open-browser",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Open the demo in a browser tab on startup (default: enabled).",
+    )
     parser.add_argument(
         "--single-view",
         action="store_true",
