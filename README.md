@@ -87,7 +87,14 @@ python -m pip install --upgrade pip
 
 ### 3. Install PyTorch for the machine
 
-For CPU-only inference on Linux or Windows:
+For CPU-only inference on Windows PowerShell, use this as one line (PowerShell
+does not use `\` for line continuation):
+
+```powershell
+python -m pip install torch==2.13.0+cpu torchvision==0.28.0+cpu --index-url https://download.pytorch.org/whl/cpu
+```
+
+For CPU-only inference on Linux:
 
 ```bash
 python -m pip install torch==2.13.0+cpu torchvision==0.28.0+cpu \
@@ -100,15 +107,38 @@ For CPU inference on macOS:
 python -m pip install torch==2.13.0 torchvision==0.28.0
 ```
 
-For NVIDIA inference, install the matching CUDA build using the command from
-the [PyTorch installation selector](https://pytorch.org/get-started/locally/),
-then verify it:
+For NVIDIA inference, do not use the CPU command above. Install the matching
+CUDA build using the command from the
+[PyTorch installation selector](https://pytorch.org/get-started/locally/), then
+verify it:
 
 ```bash
-python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+python -c "import torch; print('PyTorch:', torch.__version__); print('CUDA build:', torch.version.cuda); print('CUDA available:', torch.cuda.is_available()); print('Device:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU')"
 ```
 
-It should print `True` and the GPU name. Skip that check on a CPU-only machine.
+`CUDA available` should be `True` and `Device` should show the GPU name. If it
+prints `False`, confirm that the NVIDIA driver works and that the selector
+command installed a CUDA build rather than the CPU build.
+
+On every platform, confirm that both packages import and that their versions
+match:
+
+```bash
+python -c "import torch, torchvision; print(torch.__version__, torchvision.__version__)"
+```
+
+For the pinned CPU build this prints versions beginning with `2.13.0+cpu` and
+`0.28.0+cpu`.
+
+If Windows reports `No matching distribution found`, confirm that the active
+interpreter is the documented 64-bit Python 3.12 environment:
+
+```powershell
+python -c "import platform, sys; print(sys.executable); print(sys.version); print(platform.architecture()[0])"
+```
+
+It should point inside `.venv`, report Python 3.12.14, and print `64bit`. Do not
+run the Linux command containing `\` in PowerShell.
 
 ### 4. Install project dependencies
 
