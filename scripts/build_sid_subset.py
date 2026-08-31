@@ -93,6 +93,10 @@ def main() -> None:
         raise ValueError("SID quotas must be non-negative and at least one must be positive.")
 
     stream = load_dataset(args.dataset_id, split=args.split, streaming=True)
+    keep = {"img_id", "image", "label"}
+    removable = [name for name in stream.column_names if name not in keep]
+    if removable:
+        stream = stream.remove_columns(removable)
     stream = stream.cast_column("image", HuggingFaceImage(decode=False))
     if args.shuffle_buffer > 1:
         stream = stream.shuffle(seed=args.seed, buffer_size=args.shuffle_buffer)
@@ -135,7 +139,10 @@ def main() -> None:
                 "weight_type": "unknown",
                 "version": "unknown",
                 "source": source,
-                "content_id": image_id,
+                # Synthetic/tampered img_id values are only unique within the
+                # published HF split, so include that namespace for leakage
+                # checks across materialised train/validation manifests.
+                "content_id": f"{args.split}:{image_id}",
                 "width": width,
                 "height": height,
                 "file_format": destination.suffix.lower().lstrip("."),

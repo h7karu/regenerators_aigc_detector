@@ -24,8 +24,26 @@ def main() -> None:
     args = parser.parse_args()
 
     config = load_config(args.config)
-    frames: list[pd.DataFrame] = []
-    for split, key in (("train", "train_manifest"), ("val", "val_manifest"), ("test", "test_manifest")):
+    data_config = config["data"]
+    data_source = str(data_config.get("source", "manifest"))
+    if data_source == "sid_streaming":
+        print("SID streaming source:")
+        print(f"  dataset: {data_config.get('dataset_id', 'saberzl/SID_Set')}")
+        print(f"  train samples/epoch: {int(data_config['train_samples_per_epoch']):,}")
+        print(f"  validation samples/epoch: {int(data_config['val_samples_per_epoch']):,}")
+        if "val_samples_per_transform" in data_config:
+            print(
+                "  validation samples/transform: "
+                f"{int(data_config['val_samples_per_transform']):,}"
+            )
+        print(f"  stream workers: {int(data_config.get('num_workers', 0))}")
+        print("  local image storage: not required")
+        frames = []
+    elif data_source != "manifest":
+        raise ValueError(f"Unsupported data.source: {data_source}")
+    else:
+        frames = []
+    for split, key in (() if data_source == "sid_streaming" else (("train", "train_manifest"), ("val", "val_manifest"), ("test", "test_manifest"))):
         manifest_path = resolve_project_path(config["data"][key])
         if not manifest_path.is_file():
             raise FileNotFoundError(f"Missing {split} manifest: {manifest_path}")
@@ -38,16 +56,17 @@ def main() -> None:
         validate_manifest(frame, check_paths=not args.skip_path_check)
         frames.append(frame)
 
-    combined = normalise_manifest(pd.concat(frames, ignore_index=True))
-    validate_manifest(combined, check_paths=not args.skip_path_check)
-    print("Manifest counts:")
-    print(combined.groupby(["split", "dataset", "label"]).size().to_string())
-    print("\nGenerator counts:")
-    print(
-        combined.groupby(["dataset", "generator_family", "generator"])
-        .size()
-        .to_string()
-    )
+    if frames:
+        combined = normalise_manifest(pd.concat(frames, ignore_index=True))
+        validate_manifest(combined, check_paths=not args.skip_path_check)
+        print("Manifest counts:")
+        print(combined.groupby(["split", "dataset", "label"]).size().to_string())
+        print("\nGenerator counts:")
+        print(
+            combined.groupby(["dataset", "generator_family", "generator"])
+            .size()
+            .to_string()
+        )
 
     if torch.cuda.is_available():
         device = torch.cuda.current_device()

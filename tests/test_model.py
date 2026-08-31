@@ -1,7 +1,8 @@
 import torch
+import pytest
 from torch import nn
 
-from model import AIGCDetector, LoRALinear, count_parameters
+from model import AIGCDetector, LoRALinear, count_parameters, load_checkpoint
 
 
 def test_lora_linear_starts_as_frozen_base_layer() -> None:
@@ -72,3 +73,16 @@ def test_phase_model_forward_and_gate() -> None:
     assert auxiliary["gate"].shape == (1, 768)
     assert torch.all((auxiliary["gate"] >= 0.0) & (auxiliary["gate"] <= 1.0))
     assert count_parameters(model) < 2_000_000_000
+
+
+def test_load_checkpoint_reports_unfetched_lfs_pointer(tmp_path) -> None:
+    pointer = tmp_path / "model.pt"
+    pointer.write_text(
+        "version https://git-lfs.github.com/spec/v1\n"
+        "oid sha256:0123456789abcdef\n"
+        "size 142704560\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(RuntimeError, match="git lfs pull"):
+        load_checkpoint(nn.Linear(1, 1), pointer)

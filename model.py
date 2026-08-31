@@ -306,6 +306,14 @@ def load_checkpoint(
     map_location: str | torch.device = "cpu",
 ) -> dict[str, Any]:
     path = resolve_project_path(checkpoint_path)
+    if path.is_file() and path.stat().st_size < 1024:
+        header = path.read_bytes()[:200]
+        if header.startswith(b"version https://git-lfs.github.com/spec/v1"):
+            raise RuntimeError(
+                f"Checkpoint is only a Git LFS pointer: {path}. "
+                "Install Git LFS and run `git lfs pull --include="
+                '"checkpoints/sid_local_lora/sid_local_lora_best.pt"`.'
+            )
     checkpoint = torch.load(path, map_location=map_location, weights_only=False)
     state_dict = checkpoint.get("model_state", checkpoint)
     model.load_state_dict(state_dict)

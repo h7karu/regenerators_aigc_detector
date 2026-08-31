@@ -8,6 +8,7 @@ from typing import Callable
 import albumentations as A
 import cv2
 import numpy as np
+import torch
 from albumentations.pytorch import ToTensorV2
 from PIL import Image, ImageEnhance
 
@@ -163,6 +164,30 @@ class ImagePipeline:
         return self.preprocessing(image=transformed)
 
 
+class TTAImagePipeline:
+    """Create deterministic deployment views after an optional base degradation."""
+
+    def __init__(
+        self,
+        preprocessing: A.Compose,
+        view_transforms: tuple[str, ...],
+        base_transform: str = "clean",
+    ) -> None:
+        self.preprocessing = preprocessing
+        self.view_transforms = view_transforms
+        self.base_transform = base_transform
+
+    def __call__(self, image: np.ndarray) -> dict[str, object]:
+        base_pixels = apply_robustness_transform(image, self.base_transform)
+        views = [
+            self.preprocessing(
+                image=apply_robustness_transform(base_pixels, transform_name)
+            )["image"]
+            for transform_name in self.view_transforms
+        ]
+        return {"image": torch.stack(views)}
+
+
 class PairedTrainPipeline:
     """Create clean/degraded views after applying identical random geometry."""
 
@@ -260,6 +285,22 @@ def build_eval_transform(
         ]
     )
     return ImagePipeline(preprocessing, robustness_transform)
+
+
+def build_tta_eval_transform(
+    image_size: int,
+    view_transforms: tuple[str, ...],
+    *,
+    base_transform: str = "clean",
+) -> TTAImagePipeline:
+    preprocessing = A.Compose(
+        [
+            A.Resize(image_size, image_size, interpolation=cv2.INTER_CUBIC),
+            A.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+            ToTensorV2(),
+        ]
+    )
+    return TTAImagePipeline(preprocessing, view_transforms, base_transform)
 
 
 def build_paired_train_transform(image_size: int) -> PairedTrainPipeline:

@@ -1,0 +1,51 @@
+seed: 42
+
+data:
+  source: sid_streaming
+  dataset_id: saberzl/SID_Set
+  train_samples_per_epoch: 128
+  val_samples_per_epoch: 128
+  shuffle_buffer: 32
+  image_size: 224
+  num_workers: 2
+  persistent_workers: false
+  prefetch_factor: 2
+  balanced_sampling: false
+
+model:
+  backbone: swin_tiny_patch4_window7_224.ms_in1k
+  pretrained: true
+  dropout: 0.2
+  cache_dir: models
+  use_phase: true
+  phase_base_channels: 32
+  training_mode: lora
+  lora_rank: 4
+  lora_alpha: 8
+  lora_dropout: 0.05
+  lora_targets: [attn.qkv, attn.proj]
+
+training:
+  epochs: 1
+  batch_size: 64
+  backbone_lr: 0.00005
+  head_lr: 0.0002
+  weight_decay: 0.05
+  gradient_clip: 1.0
+  warmup_epochs: 1
+  amp: true
+  amp_init_scale: 1024
+  cudnn_benchmark: true
+  allow_tf32: true
+  fused_optimizer: true
+  early_stopping_patience: 1
+  paired_views: true
+  consistency_weight: 0.5
+  consistency_alpha: 1.0
+  consistency_warmup_epochs: 1
+  validation_transforms: [clean, jpeg_50]
+
+output:
+  checkpoint_dir: checkpoints/sid_streaming_smoke
+  checkpoint_name: sid_streaming_smoke_best.pt
+  log_dir: logs/sid_streaming_smoke

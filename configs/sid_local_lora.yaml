@@ -1,0 +1,63 @@
+seed: 42
+
+data:
+  source: manifest
+  train_manifest: data/manifests/sid_train.csv
+  val_manifest: data/manifests/sid_model_val.csv
+  test_manifest: data/manifests/sid_test.csv
+  image_size: 224
+  num_workers: 4
+  persistent_workers: true
+  prefetch_factor: 4
+  validation_num_workers: 2
+  validation_persistent_workers: false
+  validation_prefetch_factor: 2
+  balanced_sampling: true
+  sampling_columns: [label, generator]
+
+model:
+  backbone: swin_tiny_patch4_window7_224.ms_in1k
+  pretrained: true
+  dropout: 0.2
+  cache_dir: models
+  use_phase: true
+  phase_base_channels: 32
+  training_mode: lora
+  lora_rank: 4
+  lora_alpha: 8
+  lora_dropout: 0.05
+  lora_targets: [attn.qkv, attn.proj]
+
+training:
+  epochs: 6
+  batch_size: 128
+  backbone_lr: 0.00005
+  head_lr: 0.0002
+  weight_decay: 0.05
+  gradient_clip: 1.0
+  warmup_epochs: 1
+  amp: true
+  amp_init_scale: 1024
+  cudnn_benchmark: true
+  allow_tf32: true
+  fused_optimizer: true
+  # Allow resumed runs to complete all six configured epochs. The validation-best
+  # checkpoint is still updated only when the selection score improves.
+  early_stopping_patience: 6
+  paired_views: true
+  consistency_weight: 0.5
+  consistency_alpha: 1.0
+  consistency_warmup_epochs: 1
+  validation_transforms:
+    - clean
+    - jpeg_50
+    - blur_1.0
+    - resize_0.5
+    - noise_0.05
+    - color_0.2
+    - crop_0.8
+
+output:
+  checkpoint_dir: checkpoints/sid_local_lora
+  checkpoint_name: sid_local_lora_best.pt
+  log_dir: logs/sid_local_lora

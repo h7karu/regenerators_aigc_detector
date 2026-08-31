@@ -12,7 +12,19 @@ import numpy as np
 import torch
 from PIL import Image, ImageOps
 
-from augmentations import apply_robustness_transform, build_eval_transform
+from augmentations import (
+    apply_robustness_transform,
+    build_eval_transform,
+    build_tta_eval_transform,
+)
+from deployment import (
+    DEFAULT_INFERENCE_AGGREGATION,
+    DEFAULT_INFERENCE_THRESHOLD,
+    DEFAULT_INFERENCE_TRANSFORMS,
+    NEGATIVE_VERDICT,
+    POSITIVE_VERDICT,
+)
+from inference_policy import aggregate_tensor_logits
 from model import build_model, count_parameters, load_checkpoint
 from utils import load_config, resolve_project_path, select_device
 
@@ -97,6 +109,7 @@ class DemoDetector:
         config_path: str | Path,
         *,
         device: str = "auto",
+        use_tta: bool = True,
     ) -> None:
         self.config_path = resolve_project_path(config_path)
         self.checkpoint_path = resolve_project_path(checkpoint_path)
@@ -117,13 +130,32 @@ class DemoDetector:
             map_location=self.device,
         )
         self.model.eval()
-        self.threshold = float(checkpoint.get("threshold", 0.5))
+        self.checkpoint_threshold = float(checkpoint.get("threshold", 0.5))
+        self.use_tta = use_tta
+        self.tta_aggregation = DEFAULT_INFERENCE_AGGREGATION if use_tta else None
+        self.threshold = (
+            DEFAULT_INFERENCE_THRESHOLD if use_tta else self.checkpoint_threshold
+        )
         self.validation_metrics = dict(checkpoint.get("validation_metrics", {}))
+        self.validation_robustness = dict(
+            checkpoint.get("validation_robustness", {})
+        )
+        self.selected_epoch = int(checkpoint.get("epoch", -1)) + 1
         self.image_size = int(self.config["data"]["image_size"])
-        self.transforms = {
-            name: build_eval_transform(self.image_size, name)
-            for name in DEMO_TRANSFORMS
-        }
+        if use_tta:
+            self.transforms = {
+                name: build_tta_eval_transform(
+                    self.image_size,
+                    DEFAULT_INFERENCE_TRANSFORMS,
+                    base_transform=name,
+                )
+                for name in DEMO_TRANSFORMS
+            }
+        else:
+            self.transforms = {
+                name: build_eval_transform(self.image_size, name)
+                for name in DEMO_TRANSFORMS
+            }
         self.parameter_count = count_parameters(self.model)
         self._inference_lock = threading.Lock()
 
@@ -131,13 +163,22 @@ class DemoDetector:
         if transform_name not in self.transforms:
             raise ValueError(f"Unsupported demo transform: {transform_name}")
         tensor = self.transforms[transform_name](image=pixels)["image"]
-        tensor = tensor.unsqueeze(0).to(self.device)
+        tensor = (
+            tensor.to(self.device)
+            if self.use_tta
+            else tensor.unsqueeze(0).to(self.device)
+        )
         with self._inference_lock, torch.inference_mode():
-            logit = self.model(tensor)
+            logits = self.model(tensor)
+            logit = (
+                aggregate_tensor_logits(logits, method=self.tta_aggregation)
+                if self.tta_aggregation is not None
+                else logits.squeeze(0)
+            )
             return float(logit.sigmoid().item())
 
     def verdict(self, score: float) -> str:
-        return "AI Generated" if score >= self.threshold else "Real"
+        return POSITIVE_VERDICT if score >= self.threshold else NEGATIVE_VERDICT
 
     def predict(self, value: Image.Image | np.ndarray) -> PredictionResult:
         pixels, metadata = prepare_image(value)
@@ -187,10 +228,28 @@ class DemoDetector:
     def model_metadata(self) -> dict[str, object]:
         return {
             "checkpoint": self.checkpoint_path.name,
+            "config": self.config_path.name,
             "device": str(self.device),
             "parameters": self.parameter_count,
             "image_size": self.image_size,
             "decision_threshold": self.threshold,
+            "checkpoint_threshold": self.checkpoint_threshold,
+            "inference_policy": (
+                f"{len(DEFAULT_INFERENCE_TRANSFORMS)}-view "
+                f"{self.tta_aggregation} TTA"
+                if self.use_tta
+                else "single view"
+            ),
+            "inference_transforms": (
+                list(DEFAULT_INFERENCE_TRANSFORMS) if self.use_tta else ["clean"]
+            ),
+            "selected_epoch": self.selected_epoch,
             "validation_auroc": self.validation_metrics.get("auroc"),
             "validation_f1": self.validation_metrics.get("f1"),
+            "validation_selection_score": self.validation_robustness.get(
+                "selection_score"
+            ),
+            "validation_worst_auroc": self.validation_robustness.get(
+                "worst_auroc"
+            ),
         }

@@ -17,6 +17,8 @@ from sklearn.metrics import (
     roc_curve,
 )
 
+from inference_policy import aggregate_model_views
+
 
 def optimal_threshold(labels: np.ndarray, probabilities: np.ndarray) -> float:
     if np.unique(labels).size < 2:
@@ -63,6 +65,72 @@ def compute_binary_metrics(
     return metrics
 
 
+def compute_robustness_metrics(
+    predictions_by_transform: dict[str, tuple[np.ndarray, np.ndarray]],
+) -> dict[str, Any]:
+    """Summarise validation predictions using one threshold across conditions.
+
+    AUROC is calculated independently for every condition. The checkpoint
+    selection score is their unweighted mean so a clean condition cannot
+    dominate the transformed conditions merely by containing more samples.
+    The decision threshold is fitted to the pooled validation predictions.
+    """
+
+    if not predictions_by_transform:
+        raise ValueError("At least one validation transform is required.")
+
+    pooled_labels: list[np.ndarray] = []
+    pooled_probabilities: list[np.ndarray] = []
+    normalized: dict[str, tuple[np.ndarray, np.ndarray]] = {}
+    for transform_name, (labels, probabilities) in predictions_by_transform.items():
+        labels = np.asarray(labels, dtype=np.int64)
+        probabilities = np.asarray(probabilities, dtype=np.float64)
+        if labels.ndim != 1 or probabilities.ndim != 1:
+            raise ValueError("Validation labels and probabilities must be 1-D.")
+        if labels.size == 0 or labels.size != probabilities.size:
+            raise ValueError(
+                f"Invalid validation predictions for {transform_name!r}."
+            )
+        normalized[transform_name] = (labels, probabilities)
+        pooled_labels.append(labels)
+        pooled_probabilities.append(probabilities)
+
+    all_labels = np.concatenate(pooled_labels)
+    all_probabilities = np.concatenate(pooled_probabilities)
+    threshold = optimal_threshold(all_labels, all_probabilities)
+    transform_metrics = {
+        transform_name: compute_binary_metrics(
+            labels,
+            probabilities,
+            threshold=threshold,
+        )
+        for transform_name, (labels, probabilities) in normalized.items()
+    }
+    aucs = [
+        float(metrics["auroc"])
+        for metrics in transform_metrics.values()
+        if metrics["auroc"] is not None
+    ]
+    if not aucs:
+        raise ValueError(
+            "Robustness validation requires both labels in at least one condition."
+        )
+
+    return {
+        "threshold": threshold,
+        "selection_metric": "mean_transform_auroc",
+        "selection_score": float(np.mean(aucs)),
+        "mean_auroc": float(np.mean(aucs)),
+        "worst_auroc": float(np.min(aucs)),
+        "aggregate": compute_binary_metrics(
+            all_labels,
+            all_probabilities,
+            threshold=threshold,
+        ),
+        "transforms": transform_metrics,
+    }
+
+
 @torch.inference_mode()
 def collect_predictions(
     model: torch.nn.Module,
@@ -70,6 +138,7 @@ def collect_predictions(
     device: torch.device,
     *,
     max_batches: int | None = None,
+    tta_aggregation: str | None = None,
 ) -> tuple[np.ndarray, np.ndarray, list[str]]:
     model.eval()
     all_labels: list[np.ndarray] = []
@@ -79,7 +148,14 @@ def collect_predictions(
         if max_batches is not None and batch_index >= max_batches:
             break
         images = batch["image"].to(device, non_blocking=True)
-        logits = model(images)
+        if tta_aggregation is None:
+            logits = model(images)
+        else:
+            logits = aggregate_model_views(
+                model,
+                images,
+                method=tta_aggregation,
+            )
         all_probabilities.append(logits.sigmoid().cpu().numpy())
         all_labels.append(batch["label"].cpu().numpy())
         all_paths.extend(batch["path"])

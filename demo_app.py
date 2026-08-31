@@ -120,10 +120,16 @@ def create_demo(
     config_path: str | Path,
     *,
     device: str = "auto",
+    use_tta: bool = True,
 ) -> gr.Blocks:
     """Create the complete app; the checkpoint is loaded exactly once."""
 
-    detector = DemoDetector(checkpoint_path, config_path, device=device)
+    detector = DemoDetector(
+        checkpoint_path,
+        config_path,
+        device=device,
+        use_tta=use_tta,
+    )
     model_metadata = detector.model_metadata()
 
     def analyse(image: Image.Image | None):
@@ -191,7 +197,7 @@ def create_demo(
             <div class="hero">
               <h1>Regenerators AI Image Detector</h1>
               <p>RGB + Fourier-phase image forensics with compression-robust training</p>
-              <p class="prototype-note">Experimental prototype · trained on the 90,000-image CIFAKE training split</p>
+              <p class="prototype-note">Experimental prototype · CIFAKE-initialized and fine-tuned on the 40,000-image SID training split</p>
             </div>
             """
         )
@@ -264,10 +270,15 @@ def create_demo(
             gr.Markdown(
                 f"""
 - **Checkpoint:** `{model_metadata['checkpoint']}`
+- **Configuration:** `{model_metadata['config']}`
+- **Selected epoch:** {int(model_metadata['selected_epoch'])}
+- **Inference policy:** {model_metadata['inference_policy']}
+- **Inference views:** {', '.join(model_metadata['inference_transforms'])}
 - **Architecture:** Swin-Tiny RGB branch + Fourier-phase CNN with learned fusion
 - **Parameters:** {int(model_metadata['parameters']):,}
-- **Validation AUROC:** {float(model_metadata.get('validation_auroc') or 0.0):.4f}
-- **Current scope:** trained on CIFAKE; real-world and unseen-generator generalisation is not established.
+- **Pooled validation AUROC:** {float(model_metadata.get('validation_auroc') or 0.0):.4f}
+- **Worst-condition validation AUROC:** {float(model_metadata.get('validation_worst_auroc') or 0.0):.4f}
+- **Current scope:** fine-tuned on SID real, fully synthetic, and tampered images; broader real-world and unseen-generator generalisation is not established.
 - **Interpretation:** pixel-only detection is supporting evidence, not definitive provenance.
                 """
             )
@@ -287,6 +298,7 @@ def create_demo(
             inputs=image_input,
             outputs=[verdict, score, threshold, runtime, details],
             concurrency_limit=1,
+            api_name="analyse",
         )
         robustness_button.click(
             fn=analyse_robustness,
@@ -298,6 +310,7 @@ def create_demo(
                 preview_gallery,
             ],
             concurrency_limit=1,
+            api_name="robustness",
         )
         clear_button.add(
             [

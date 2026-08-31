@@ -65,7 +65,12 @@ def atomic_write_json(payload: Any, path: str | Path) -> None:
 
 def worker_seed(worker_id: int) -> None:
     """Give each DataLoader worker a deterministic NumPy/Python seed."""
+    import cv2
+
     del worker_id
     seed = torch.initial_seed() % (2**32)
     np.random.seed(seed)
     random.seed(seed)
+    # Each worker is already a separate process. Letting OpenCV use every host
+    # core inside every worker causes severe oversubscription on blur/resize.
+    cv2.setNumThreads(1)

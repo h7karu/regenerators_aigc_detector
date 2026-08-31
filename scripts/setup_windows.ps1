@@ -8,6 +8,32 @@ $projectRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
 $environmentRoot = Join-Path $projectRoot ".venv"
 $pythonExecutable = Join-Path $environmentRoot "Scripts\python.exe"
 $requirementsFile = Join-Path $projectRoot "requirements.txt"
+$deployedCheckpointRelative = "checkpoints/sid_local_lora/sid_local_lora_best.pt"
+$deployedCheckpoint = Join-Path $projectRoot $deployedCheckpointRelative
+
+& git lfs version *> $null
+if ($LASTEXITCODE -ne 0) {
+    throw "Git LFS is required. Install it from https://git-lfs.com/ and rerun this script."
+}
+
+& git lfs install --local
+if ($LASTEXITCODE -ne 0) {
+    throw "Git LFS repository setup failed."
+}
+
+& git lfs pull --include=$deployedCheckpointRelative
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to fetch $deployedCheckpointRelative through Git LFS."
+}
+
+if (-not (Test-Path -LiteralPath $deployedCheckpoint)) {
+    throw "Missing deployed checkpoint: $deployedCheckpoint"
+}
+
+$checkpointSize = (Get-Item -LiteralPath $deployedCheckpoint).Length
+if ($checkpointSize -lt 100000000) {
+    throw "$deployedCheckpoint is too small ($checkpointSize bytes); Git LFS may have left a pointer file."
+}
 
 $uvCommand = Get-Command uv -ErrorAction SilentlyContinue
 if (-not $uvCommand) {

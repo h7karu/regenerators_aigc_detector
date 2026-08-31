@@ -1,0 +1,55 @@
+seed: 42
+
+data:
+  source: manifest
+  train_manifest: data/manifests/cifake_train.csv
+  val_manifest: data/manifests/cifake_val.csv
+  train_limit: 2560
+  val_limit: 512
+  image_size: 224
+  num_workers: 4
+  persistent_workers: true
+  prefetch_factor: 4
+  validation_num_workers: 2
+  validation_persistent_workers: false
+  validation_prefetch_factor: 2
+  balanced_sampling: true
+  sampling_columns: [label, dataset, generator]
+
+model:
+  backbone: swin_tiny_patch4_window7_224.ms_in1k
+  pretrained: true
+  dropout: 0.2
+  cache_dir: models
+  use_phase: true
+  phase_base_channels: 32
+  training_mode: lora
+  lora_rank: 4
+  lora_alpha: 8
+  lora_dropout: 0.05
+  lora_targets: [attn.qkv, attn.proj]
+
+training:
+  epochs: 1
+  batch_size: 128
+  backbone_lr: 0.00005
+  head_lr: 0.0002
+  weight_decay: 0.05
+  gradient_clip: 1.0
+  warmup_epochs: 1
+  amp: true
+  amp_init_scale: 1024
+  cudnn_benchmark: true
+  allow_tf32: true
+  fused_optimizer: true
+  early_stopping_patience: 1
+  paired_views: true
+  consistency_weight: 0.5
+  consistency_alpha: 1.0
+  consistency_warmup_epochs: 1
+  validation_transforms: [clean]
+
+output:
+  checkpoint_dir: checkpoints/gpu_speed_smoke
+  checkpoint_name: gpu_speed_smoke_best.pt
+  log_dir: logs/gpu_speed_smoke

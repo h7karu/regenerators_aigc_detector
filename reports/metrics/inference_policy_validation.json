@@ -1,0 +1,2102 @@
+{
+  "selection_data": {
+    "sid": {
+      "manifest": "data/manifests/sid_model_val.csv",
+      "samples": 2000
+    },
+    "cifake": {
+      "manifest": "data/manifests/cifake_val.csv",
+      "samples": 10000
+    }
+  },
+  "checkpoints": {
+    "sid": "checkpoints/sid_local_lora/sid_local_lora_best.pt",
+    "cifake": "checkpoints/full_cifake_lora/full_cifake_lora_best.pt"
+  },
+  "checkpoint_thresholds": {
+    "sid": 0.4952949285507202,
+    "cifake": 0.8002490401268005
+  },
+  "tta_transforms": [
+    "clean",
+    "jpeg_70",
+    "blur_1.0",
+    "resize_0.5",
+    "crop_0.8"
+  ],
+  "single_model": {
+    "sid": {
+      "clean": {
+        "sid": {
+          "threshold": 0.4845687483351077,
+          "samples": 2000,
+          "balanced_accuracy": 0.8795,
+          "f1": 0.8809876543209877,
+          "precision": 0.8702439024390244,
+          "recall": 0.892,
+          "false_positive_rate": 0.133,
+          "confusion_matrix": [
+            [
+              867,
+              133
+            ],
+            [
+              108,
+              892
+            ]
+          ],
+          "auroc": 0.946033,
+          "average_precision": 0.95209472394077
+        },
+        "cifake": {
+          "threshold": 0.28496313750578023,
+          "samples": 10000,
+          "balanced_accuracy": 0.8725,
+          "f1": 0.8714847293619595,
+          "precision": 0.8784799837431416,
+          "recall": 0.8646,
+          "false_positive_rate": 0.1196,
+          "confusion_matrix": [
+            [
+              4402,
+              598
+            ],
+            [
+              677,
+              4323
+            ]
+          ],
+          "auroc": 0.9423684399999999,
+          "average_precision": 0.9479103991052263
+        }
+      },
+      "median": {
+        "sid": {
+          "threshold": 0.4845687483351077,
+          "samples": 2000,
+          "balanced_accuracy": 0.883,
+          "f1": 0.8839285714285714,
+          "precision": 0.8769685039370079,
+          "recall": 0.891,
+          "false_positive_rate": 0.125,
+          "confusion_matrix": [
+            [
+              875,
+              125
+            ],
+            [
+              109,
+              891
+            ]
+          ],
+          "auroc": 0.9481814999999999,
+          "average_precision": 0.9541736970863913
+        },
+        "cifake": {
+          "threshold": 0.25893964132768293,
+          "samples": 10000,
+          "balanced_accuracy": 0.8586,
+          "f1": 0.856708552898257,
+          "precision": 0.8683237469186524,
+          "recall": 0.8454,
+          "false_positive_rate": 0.1282,
+          "confusion_matrix": [
+            [
+              4359,
+              641
+            ],
+            [
+              773,
+              4227
+            ]
+          ],
+          "auroc": 0.9376716799999999,
+          "average_precision": 0.940872653409493
+        }
+      },
+      "trimmed_mean": {
+        "sid": {
+          "threshold": 0.4856400298408816,
+          "samples": 2000,
+          "balanced_accuracy": 0.8825000000000001,
+          "f1": 0.8833746898263027,
+          "precision": 0.8768472906403941,
+          "recall": 0.89,
+          "false_positive_rate": 0.125,
+          "confusion_matrix": [
+            [
+              875,
+              125
+            ],
+            [
+              110,
+              890
+            ]
+          ],
+          "auroc": 0.9483529999999999,
+          "average_precision": 0.9542673537954338
+        },
+        "cifake": {
+          "threshold": 0.26755374809165183,
+          "samples": 10000,
+          "balanced_accuracy": 0.864,
+          "f1": 0.8605986059860599,
+          "precision": 0.8826745164003365,
+          "recall": 0.8396,
+          "false_positive_rate": 0.1116,
+          "confusion_matrix": [
+            [
+              4442,
+              558
+            ],
+            [
+              802,
+              4198
+            ]
+          ],
+          "auroc": 0.94156356,
+          "average_precision": 0.9445099531454172
+        }
+      }
+    },
+    "cifake": {
+      "clean": {
+        "sid": {
+          "threshold": 0.9174088689845777,
+          "samples": 2000,
+          "balanced_accuracy": 0.6795,
+          "f1": 0.6603073661897191,
+          "precision": 0.7023675310033822,
+          "recall": 0.623,
+          "false_positive_rate": 0.264,
+          "confusion_matrix": [
+            [
+              736,
+              264
+            ],
+            [
+              377,
+              623
+            ]
+          ],
+          "auroc": 0.740893,
+          "average_precision": 0.7510902726199236
+        },
+        "cifake": {
+          "threshold": 0.800249022110732,
+          "samples": 10000,
+          "balanced_accuracy": 0.9741,
+          "f1": 0.9742467932783136,
+          "precision": 0.9687561795530947,
+          "recall": 0.9798,
+          "false_positive_rate": 0.0316,
+          "confusion_matrix": [
+            [
+              4842,
+              158
+            ],
+            [
+              101,
+              4899
+            ]
+          ],
+          "auroc": 0.9970363200000001,
+          "average_precision": 0.9969848080062077
+        }
+      },
+      "median": {
+        "sid": {
+          "threshold": 0.9200241958648433,
+          "samples": 2000,
+          "balanced_accuracy": 0.679,
+          "f1": 0.6533477321814255,
+          "precision": 0.710093896713615,
+          "recall": 0.605,
+          "false_positive_rate": 0.247,
+          "confusion_matrix": [
+            [
+              753,
+              247
+            ],
+            [
+              395,
+              605
+            ]
+          ],
+          "auroc": 0.7405369999999999,
+          "average_precision": 0.7526338506916753
+        },
+        "cifake": {
+          "threshold": 0.4927740392567649,
+          "samples": 10000,
+          "balanced_accuracy": 0.9712000000000001,
+          "f1": 0.9711191335740073,
+          "precision": 0.9738535800482703,
+          "recall": 0.9684,
+          "false_positive_rate": 0.026,
+          "confusion_matrix": [
+            [
+              4870,
+              130
+            ],
+            [
+              158,
+              4842
+            ]
+          ],
+          "auroc": 0.99643044,
+          "average_precision": 0.9964936580990887
+        }
+      },
+      "trimmed_mean": {
+        "sid": {
+          "threshold": 0.9195800960882856,
+          "samples": 2000,
+          "balanced_accuracy": 0.6779999999999999,
+          "f1": 0.6533907427341227,
+          "precision": 0.7074592074592074,
+          "recall": 0.607,
+          "false_positive_rate": 0.251,
+          "confusion_matrix": [
+            [
+              749,
+              251
+            ],
+            [
+              393,
+              607
+            ]
+          ],
+          "auroc": 0.740459,
+          "average_precision": 0.7531068121425827
+        },
+        "cifake": {
+          "threshold": 0.4092753715997404,
+          "samples": 10000,
+          "balanced_accuracy": 0.9737,
+          "f1": 0.9738646526880652,
+          "precision": 0.9678056488248075,
+          "recall": 0.98,
+          "false_positive_rate": 0.0326,
+          "confusion_matrix": [
+            [
+              4837,
+              163
+            ],
+            [
+              100,
+              4900
+            ]
+          ],
+          "auroc": 0.99703028,
+          "average_precision": 0.9970328116985431
+        }
+      }
+    }
+  },
+  "ensembles": {
+    "clean": {
+      "native_thresholds": {
+        "sid": 0.4845687483351077,
+        "cifake": 0.800249022110732
+      },
+      "native_scales": {
+        "sid": 1.6250637885712467,
+        "cifake": 3.0131559112672135
+      },
+      "best_alpha": 0.95,
+      "best": {
+        "threshold": 0.42499037520066535,
+        "mean_domain_auroc": 0.9512499000000001,
+        "worst_domain_auroc": 0.945652,
+        "domains": {
+          "sid": {
+            "threshold": 0.42499037520066535,
+            "samples": 2000,
+            "balanced_accuracy": 0.8365,
+            "f1": 0.8539526574363555,
+            "precision": 0.7715899919289749,
+            "recall": 0.956,
+            "false_positive_rate": 0.283,
+            "confusion_matrix": [
+              [
+                717,
+                283
+              ],
+              [
+                44,
+                956
+              ]
+            ],
+            "auroc": 0.945652,
+            "average_precision": 0.9517997260128469
+          },
+          "cifake": {
+            "threshold": 0.42499037520066535,
+            "samples": 10000,
+            "balanced_accuracy": 0.8618,
+            "f1": 0.8467169476486247,
+            "precision": 0.9504482071713147,
+            "recall": 0.7634,
+            "false_positive_rate": 0.0398,
+            "confusion_matrix": [
+              [
+                4801,
+                199
+              ],
+              [
+                1183,
+                3817
+              ]
+            ],
+            "auroc": 0.9568478,
+            "average_precision": 0.9589585465543213
+          }
+        }
+      },
+      "candidates": {
+        "0.50": {
+          "threshold": 0.49674405195327065,
+          "mean_domain_auroc": 0.9642375400000001,
+          "worst_domain_auroc": 0.934466,
+          "domains": {
+            "sid": {
+              "threshold": 0.49674405195327065,
+              "samples": 2000,
+              "balanced_accuracy": 0.8335,
+              "f1": 0.8478757423481041,
+              "precision": 0.7804878048780488,
+              "recall": 0.928,
+              "false_positive_rate": 0.261,
+              "confusion_matrix": [
+                [
+                  739,
+                  261
+                ],
+                [
+                  72,
+                  928
+                ]
+              ],
+              "auroc": 0.934466,
+              "average_precision": 0.9439826695757377
+            },
+            "cifake": {
+              "threshold": 0.49674405195327065,
+              "samples": 10000,
+              "balanced_accuracy": 0.9251,
+              "f1": 0.9201237069425189,
+              "precision": 0.9856065798492117,
+              "recall": 0.8628,
+              "false_positive_rate": 0.0126,
+              "confusion_matrix": [
+                [
+                  4937,
+                  63
+                ],
+                [
+                  686,
+                  4314
+                ]
+              ],
+              "auroc": 0.9940090800000001,
+              "average_precision": 0.9931866379417873
+            }
+          }
+        },
+        "0.55": {
+          "threshold": 0.483809559523438,
+          "mean_domain_auroc": 0.96514868,
+          "worst_domain_auroc": 0.937217,
+          "domains": {
+            "sid": {
+              "threshold": 0.483809559523438,
+              "samples": 2000,
+              "balanced_accuracy": 0.8295,
+              "f1": 0.8454916175804259,
+              "precision": 0.7729908864954432,
+              "recall": 0.933,
+              "false_positive_rate": 0.274,
+              "confusion_matrix": [
+                [
+                  726,
+                  274
+                ],
+                [
+                  67,
+                  933
+                ]
+              ],
+              "auroc": 0.937217,
+              "average_precision": 0.9458416013851171
+            },
+            "cifake": {
+              "threshold": 0.483809559523438,
+              "samples": 10000,
+              "balanced_accuracy": 0.9234,
+              "f1": 0.9183890901342425,
+              "precision": 0.982672138622891,
+              "recall": 0.862,
+              "false_positive_rate": 0.0152,
+              "confusion_matrix": [
+                [
+                  4924,
+                  76
+                ],
+                [
+                  690,
+                  4310
+                ]
+              ],
+              "auroc": 0.99308036,
+              "average_precision": 0.9920767091417723
+            }
+          }
+        },
+        "0.60": {
+          "threshold": 0.47171554491636936,
+          "mean_domain_auroc": 0.96564672,
+          "worst_domain_auroc": 0.9393489999999999,
+          "domains": {
+            "sid": {
+              "threshold": 0.47171554491636936,
+              "samples": 2000,
+              "balanced_accuracy": 0.826,
+              "f1": 0.8442256042972247,
+              "precision": 0.7641815235008104,
+              "recall": 0.943,
+              "false_positive_rate": 0.291,
+              "confusion_matrix": [
+                [
+                  709,
+                  291
+                ],
+                [
+                  57,
+                  943
+                ]
+              ],
+              "auroc": 0.9393489999999999,
+              "average_precision": 0.9472645490193153
+            },
+            "cifake": {
+              "threshold": 0.47171554491636936,
+              "samples": 10000,
+              "balanced_accuracy": 0.9221,
+              "f1": 0.9170835550824907,
+              "precision": 0.9802047781569966,
+              "recall": 0.8616,
+              "false_positive_rate": 0.0174,
+              "confusion_matrix": [
+                [
+                  4913,
+                  87
+                ],
+                [
+                  692,
+                  4308
+                ]
+              ],
+              "auroc": 0.99194444,
+              "average_precision": 0.9907463438070669
+            }
+          }
+        },
+        "0.65": {
+          "threshold": 0.4606514357319989,
+          "mean_domain_auroc": 0.9657450999999999,
+          "worst_domain_auroc": 0.941027,
+          "domains": {
+            "sid": {
+              "threshold": 0.4606514357319989,
+              "samples": 2000,
+              "balanced_accuracy": 0.823,
+              "f1": 0.8428063943161634,
+              "precision": 0.7579872204472844,
+              "recall": 0.949,
+              "false_positive_rate": 0.303,
+              "confusion_matrix": [
+                [
+                  697,
+                  303
+                ],
+                [
+                  51,
+                  949
+                ]
+              ],
+              "auroc": 0.941027,
+              "average_precision": 0.9484403636931188
+            },
+            "cifake": {
+              "threshold": 0.4606514357319989,
+              "samples": 10000,
+              "balanced_accuracy": 0.9178999999999999,
+              "f1": 0.9125386172366038,
+              "precision": 0.976293594711648,
+              "recall": 0.8566,
+              "false_positive_rate": 0.0208,
+              "confusion_matrix": [
+                [
+                  4896,
+                  104
+                ],
+                [
+                  717,
+                  4283
+                ]
+              ],
+              "auroc": 0.9904632,
+              "average_precision": 0.9890671183085668
+            }
+          }
+        },
+        "0.70": {
+          "threshold": 0.4505986671406257,
+          "mean_domain_auroc": 0.96539156,
+          "worst_domain_auroc": 0.9423130000000001,
+          "domains": {
+            "sid": {
+              "threshold": 0.4505986671406257,
+              "samples": 2000,
+              "balanced_accuracy": 0.823,
+              "f1": 0.843501326259947,
+              "precision": 0.7559429477020603,
+              "recall": 0.954,
+              "false_positive_rate": 0.308,
+              "confusion_matrix": [
+                [
+                  692,
+                  308
+                ],
+                [
+                  46,
+                  954
+                ]
+              ],
+              "auroc": 0.9423130000000001,
+              "average_precision": 0.9493422540618239
+            },
+            "cifake": {
+              "threshold": 0.4505986671406257,
+              "samples": 10000,
+              "balanced_accuracy": 0.9133,
+              "f1": 0.9073618976386366,
+              "precision": 0.9740766230786878,
+              "recall": 0.8492,
+              "false_positive_rate": 0.0226,
+              "confusion_matrix": [
+                [
+                  4887,
+                  113
+                ],
+                [
+                  754,
+                  4246
+                ]
+              ],
+              "auroc": 0.98847012,
+              "average_precision": 0.9868958725242682
+            }
+          }
+        },
+        "0.75": {
+          "threshold": 0.44234651472162595,
+          "mean_domain_auroc": 0.96455604,
+          "worst_domain_auroc": 0.943386,
+          "domains": {
+            "sid": {
+              "threshold": 0.44234651472162595,
+              "samples": 2000,
+              "balanced_accuracy": 0.8245,
+              "f1": 0.8447589562140646,
+              "precision": 0.7573354480570975,
+              "recall": 0.955,
+              "false_positive_rate": 0.306,
+              "confusion_matrix": [
+                [
+                  694,
+                  306
+                ],
+                [
+                  45,
+                  955
+                ]
+              ],
+              "auroc": 0.943386,
+              "average_precision": 0.9501588924512181
+            },
+            "cifake": {
+              "threshold": 0.44234651472162595,
+              "samples": 10000,
+              "balanced_accuracy": 0.9077999999999999,
+              "f1": 0.9010729613733905,
+              "precision": 0.9719907407407408,
+              "recall": 0.8398,
+              "false_positive_rate": 0.0242,
+              "confusion_matrix": [
+                [
+                  4879,
+                  121
+                ],
+                [
+                  801,
+                  4199
+                ]
+              ],
+              "auroc": 0.9857260800000001,
+              "average_precision": 0.9840437703992816
+            }
+          }
+        },
+        "0.80": {
+          "threshold": 0.4392508331511759,
+          "mean_domain_auroc": 0.96296828,
+          "worst_domain_auroc": 0.9441490000000001,
+          "domains": {
+            "sid": {
+              "threshold": 0.4392508331511759,
+              "samples": 2000,
+              "balanced_accuracy": 0.832,
+              "f1": 0.8504007123775601,
+              "precision": 0.7664526484751204,
+              "recall": 0.955,
+              "false_positive_rate": 0.291,
+              "confusion_matrix": [
+                [
+                  709,
+                  291
+                ],
+                [
+                  45,
+                  955
+                ]
+              ],
+              "auroc": 0.9441490000000001,
+              "average_precision": 0.9506822189579323
+            },
+            "cifake": {
+              "threshold": 0.4392508331511759,
+              "samples": 10000,
+              "balanced_accuracy": 0.892,
+              "f1": 0.8823016564952049,
+              "precision": 0.9693486590038314,
+              "recall": 0.8096,
+              "false_positive_rate": 0.0256,
+              "confusion_matrix": [
+                [
+                  4872,
+                  128
+                ],
+                [
+                  952,
+                  4048
+                ]
+              ],
+              "auroc": 0.9817875599999999,
+              "average_precision": 0.9801745347081761
+            }
+          }
+        },
+        "0.85": {
+          "threshold": 0.43079462218259856,
+          "mean_domain_auroc": 0.9604230999999999,
+          "worst_domain_auroc": 0.9447899999999999,
+          "domains": {
+            "sid": {
+              "threshold": 0.43079462218259856,
+              "samples": 2000,
+              "balanced_accuracy": 0.8294999999999999,
+              "f1": 0.8486462494451842,
+              "precision": 0.7629688747007183,
+              "recall": 0.956,
+              "false_positive_rate": 0.297,
+              "confusion_matrix": [
+                [
+                  703,
+                  297
+                ],
+                [
+                  44,
+                  956
+                ]
+              ],
+              "auroc": 0.9447899999999999,
+              "average_precision": 0.9511396859199914
+            },
+            "cifake": {
+              "threshold": 0.43079462218259856,
+              "samples": 10000,
+              "balanced_accuracy": 0.8855999999999999,
+              "f1": 0.8752453653217012,
+              "precision": 0.9623501199040767,
+              "recall": 0.8026,
+              "false_positive_rate": 0.0314,
+              "confusion_matrix": [
+                [
+                  4843,
+                  157
+                ],
+                [
+                  987,
+                  4013
+                ]
+              ],
+              "auroc": 0.9760561999999999,
+              "average_precision": 0.9748867638497725
+            }
+          }
+        },
+        "0.90": {
+          "threshold": 0.4174561503749778,
+          "mean_domain_auroc": 0.95660324,
+          "worst_domain_auroc": 0.9452590000000001,
+          "domains": {
+            "sid": {
+              "threshold": 0.4174561503749778,
+              "samples": 2000,
+              "balanced_accuracy": 0.825,
+              "f1": 0.8459507042253521,
+              "precision": 0.7555031446540881,
+              "recall": 0.961,
+              "false_positive_rate": 0.311,
+              "confusion_matrix": [
+                [
+                  689,
+                  311
+                ],
+                [
+                  39,
+                  961
+                ]
+              ],
+              "auroc": 0.9452590000000001,
+              "average_precision": 0.9514896217963956
+            },
+            "cifake": {
+              "threshold": 0.4174561503749778,
+              "samples": 10000,
+              "balanced_accuracy": 0.883,
+              "f1": 0.8736228127025275,
+              "precision": 0.949741662752466,
+              "recall": 0.8088,
+              "false_positive_rate": 0.0428,
+              "confusion_matrix": [
+                [
+                  4786,
+                  214
+                ],
+                [
+                  956,
+                  4044
+                ]
+              ],
+              "auroc": 0.96794748,
+              "average_precision": 0.9679072096821212
+            }
+          }
+        },
+        "0.95": {
+          "threshold": 0.42499037520066535,
+          "mean_domain_auroc": 0.9512499000000001,
+          "worst_domain_auroc": 0.945652,
+          "domains": {
+            "sid": {
+              "threshold": 0.42499037520066535,
+              "samples": 2000,
+              "balanced_accuracy": 0.8365,
+              "f1": 0.8539526574363555,
+              "precision": 0.7715899919289749,
+              "recall": 0.956,
+              "false_positive_rate": 0.283,
+              "confusion_matrix": [
+                [
+                  717,
+                  283
+                ],
+                [
+                  44,
+                  956
+                ]
+              ],
+              "auroc": 0.945652,
+              "average_precision": 0.9517997260128469
+            },
+            "cifake": {
+              "threshold": 0.42499037520066535,
+              "samples": 10000,
+              "balanced_accuracy": 0.8618,
+              "f1": 0.8467169476486247,
+              "precision": 0.9504482071713147,
+              "recall": 0.7634,
+              "false_positive_rate": 0.0398,
+              "confusion_matrix": [
+                [
+                  4801,
+                  199
+                ],
+                [
+                  1183,
+                  3817
+                ]
+              ],
+              "auroc": 0.9568478,
+              "average_precision": 0.9589585465543213
+            }
+          }
+        },
+        "1.00": {
+          "threshold": 0.4250786761430627,
+          "mean_domain_auroc": 0.94420072,
+          "worst_domain_auroc": 0.9423684399999999,
+          "domains": {
+            "sid": {
+              "threshold": 0.4250786761430627,
+              "samples": 2000,
+              "balanced_accuracy": 0.8425,
+              "f1": 0.8584269662921349,
+              "precision": 0.7795918367346939,
+              "recall": 0.955,
+              "false_positive_rate": 0.27,
+              "confusion_matrix": [
+                [
+                  730,
+                  270
+                ],
+                [
+                  45,
+                  955
+                ]
+              ],
+              "auroc": 0.946033,
+              "average_precision": 0.95209472394077
+            },
+            "cifake": {
+              "threshold": 0.4250786761430627,
+              "samples": 10000,
+              "balanced_accuracy": 0.847,
+              "f1": 0.8283598833295939,
+              "precision": 0.9432805314256515,
+              "recall": 0.7384,
+              "false_positive_rate": 0.0444,
+              "confusion_matrix": [
+                [
+                  4778,
+                  222
+                ],
+                [
+                  1308,
+                  3692
+                ]
+              ],
+              "auroc": 0.9423684399999999,
+              "average_precision": 0.9479103991052263
+            }
+          }
+        }
+      }
+    },
+    "median": {
+      "native_thresholds": {
+        "sid": 0.4845687483351077,
+        "cifake": 0.4927740392567649
+      },
+      "native_scales": {
+        "sid": 1.6338095546193436,
+        "cifake": 3.0104785175657827
+      },
+      "best_alpha": 0.95,
+      "best": {
+        "threshold": 0.4118648362826321,
+        "mean_domain_auroc": 0.9521951999999999,
+        "worst_domain_auroc": 0.9478329999999999,
+        "domains": {
+          "sid": {
+            "threshold": 0.4118648362826321,
+            "samples": 2000,
+            "balanced_accuracy": 0.8265,
+            "f1": 0.8473383194016718,
+            "precision": 0.7564807541241163,
+            "recall": 0.963,
+            "false_positive_rate": 0.31,
+            "confusion_matrix": [
+              [
+                690,
+                310
+              ],
+              [
+                37,
+                963
+              ]
+            ],
+            "auroc": 0.9478329999999999,
+            "average_precision": 0.9538999444342684
+          },
+          "cifake": {
+            "threshold": 0.4118648362826321,
+            "samples": 10000,
+            "balanced_accuracy": 0.8357,
+            "f1": 0.8103428373542653,
+            "precision": 0.9582309582309583,
+            "recall": 0.702,
+            "false_positive_rate": 0.0306,
+            "confusion_matrix": [
+              [
+                4847,
+                153
+              ],
+              [
+                1490,
+                3510
+              ]
+            ],
+            "auroc": 0.9565573999999999,
+            "average_precision": 0.9567617162074437
+          }
+        }
+      },
+      "candidates": {
+        "0.50": {
+          "threshold": 0.5317619098283936,
+          "mean_domain_auroc": 0.9658579,
+          "worst_domain_auroc": 0.936936,
+          "domains": {
+            "sid": {
+              "threshold": 0.5317619098283936,
+              "samples": 2000,
+              "balanced_accuracy": 0.802,
+              "f1": 0.8269230769230769,
+              "precision": 0.734472049689441,
+              "recall": 0.946,
+              "false_positive_rate": 0.342,
+              "confusion_matrix": [
+                [
+                  658,
+                  342
+                ],
+                [
+                  54,
+                  946
+                ]
+              ],
+              "auroc": 0.936936,
+              "average_precision": 0.9462013490267149
+            },
+            "cifake": {
+              "threshold": 0.5317619098283936,
+              "samples": 10000,
+              "balanced_accuracy": 0.9092,
+              "f1": 0.9007650273224044,
+              "precision": 0.9930120481927711,
+              "recall": 0.8242,
+              "false_positive_rate": 0.0058,
+              "confusion_matrix": [
+                [
+                  4971,
+                  29
+                ],
+                [
+                  879,
+                  4121
+                ]
+              ],
+              "auroc": 0.9947798,
+              "average_precision": 0.994482574682708
+            }
+          }
+        },
+        "0.55": {
+          "threshold": 0.512840228259652,
+          "mean_domain_auroc": 0.96681802,
+          "worst_domain_auroc": 0.939547,
+          "domains": {
+            "sid": {
+              "threshold": 0.512840228259652,
+              "samples": 2000,
+              "balanced_accuracy": 0.7969999999999999,
+              "f1": 0.8246977547495682,
+              "precision": 0.7256838905775076,
+              "recall": 0.955,
+              "false_positive_rate": 0.361,
+              "confusion_matrix": [
+                [
+                  639,
+                  361
+                ],
+                [
+                  45,
+                  955
+                ]
+              ],
+              "auroc": 0.939547,
+              "average_precision": 0.9479720844421762
+            },
+            "cifake": {
+              "threshold": 0.512840228259652,
+              "samples": 10000,
+              "balanced_accuracy": 0.9104,
+              "f1": 0.9024177739054672,
+              "precision": 0.990674318507891,
+              "recall": 0.8286,
+              "false_positive_rate": 0.0078,
+              "confusion_matrix": [
+                [
+                  4961,
+                  39
+                ],
+                [
+                  857,
+                  4143
+                ]
+              ],
+              "auroc": 0.9940890399999999,
+              "average_precision": 0.9936724300098829
+            }
+          }
+        },
+        "0.60": {
+          "threshold": 0.4964840406332529,
+          "mean_domain_auroc": 0.9674339999999999,
+          "worst_domain_auroc": 0.9416829999999999,
+          "domains": {
+            "sid": {
+              "threshold": 0.4964840406332529,
+              "samples": 2000,
+              "balanced_accuracy": 0.7965,
+              "f1": 0.8247955230305639,
+              "precision": 0.7241118669690099,
+              "recall": 0.958,
+              "false_positive_rate": 0.365,
+              "confusion_matrix": [
+                [
+                  635,
+                  365
+                ],
+                [
+                  42,
+                  958
+                ]
+              ],
+              "auroc": 0.9416829999999999,
+              "average_precision": 0.9494165911238327
+            },
+            "cifake": {
+              "threshold": 0.4964840406332529,
+              "samples": 10000,
+              "balanced_accuracy": 0.909,
+              "f1": 0.9009146341463414,
+              "precision": 0.9887667304015296,
+              "recall": 0.8274,
+              "false_positive_rate": 0.0094,
+              "confusion_matrix": [
+                [
+                  4953,
+                  47
+                ],
+                [
+                  863,
+                  4137
+                ]
+              ],
+              "auroc": 0.9931849999999999,
+              "average_precision": 0.9926062095182755
+            }
+          }
+        },
+        "0.65": {
+          "threshold": 0.48043070159325524,
+          "mean_domain_auroc": 0.9676445,
+          "worst_domain_auroc": 0.943287,
+          "domains": {
+            "sid": {
+              "threshold": 0.48043070159325524,
+              "samples": 2000,
+              "balanced_accuracy": 0.7969999999999999,
+              "f1": 0.8260497000856898,
+              "precision": 0.7226386806596702,
+              "recall": 0.964,
+              "false_positive_rate": 0.37,
+              "confusion_matrix": [
+                [
+                  630,
+                  370
+                ],
+                [
+                  36,
+                  964
+                ]
+              ],
+              "auroc": 0.943287,
+              "average_precision": 0.9505247851199133
+            },
+            "cifake": {
+              "threshold": 0.48043070159325524,
+              "samples": 10000,
+              "balanced_accuracy": 0.9064,
+              "f1": 0.8979947689625108,
+              "precision": 0.9865900383141762,
+              "recall": 0.824,
+              "false_positive_rate": 0.0112,
+              "confusion_matrix": [
+                [
+                  4944,
+                  56
+                ],
+                [
+                  880,
+                  4120
+                ]
+              ],
+              "auroc": 0.992002,
+              "average_precision": 0.9912302667490462
+            }
+          }
+        },
+        "0.70": {
+          "threshold": 0.4590845182983492,
+          "mean_domain_auroc": 0.9674635200000001,
+          "worst_domain_auroc": 0.9445320000000001,
+          "domains": {
+            "sid": {
+              "threshold": 0.4590845182983492,
+              "samples": 2000,
+              "balanced_accuracy": 0.7865,
+              "f1": 0.819144430326133,
+              "precision": 0.7105069801616458,
+              "recall": 0.967,
+              "false_positive_rate": 0.394,
+              "confusion_matrix": [
+                [
+                  606,
+                  394
+                ],
+                [
+                  33,
+                  967
+                ]
+              ],
+              "auroc": 0.9445320000000001,
+              "average_precision": 0.9514399609461045
+            },
+            "cifake": {
+              "threshold": 0.4590845182983492,
+              "samples": 10000,
+              "balanced_accuracy": 0.9107000000000001,
+              "f1": 0.9033654366410562,
+              "precision": 0.9842018391888705,
+              "recall": 0.8348,
+              "false_positive_rate": 0.0134,
+              "confusion_matrix": [
+                [
+                  4933,
+                  67
+                ],
+                [
+                  826,
+                  4174
+                ]
+              ],
+              "auroc": 0.99039504,
+              "average_precision": 0.9894015880607447
+            }
+          }
+        },
+        "0.75": {
+          "threshold": 0.4522332191659388,
+          "mean_domain_auroc": 0.96679286,
+          "worst_domain_auroc": 0.945565,
+          "domains": {
+            "sid": {
+              "threshold": 0.4522332191659388,
+              "samples": 2000,
+              "balanced_accuracy": 0.8005,
+              "f1": 0.8288288288288288,
+              "precision": 0.7257700976709242,
+              "recall": 0.966,
+              "false_positive_rate": 0.365,
+              "confusion_matrix": [
+                [
+                  635,
+                  365
+                ],
+                [
+                  34,
+                  966
+                ]
+              ],
+              "auroc": 0.945565,
+              "average_precision": 0.9521732744128876
+            },
+            "cifake": {
+              "threshold": 0.4522332191659388,
+              "samples": 10000,
+              "balanced_accuracy": 0.8905,
+              "f1": 0.8789118655313503,
+              "precision": 0.9829334652485778,
+              "recall": 0.7948,
+              "false_positive_rate": 0.0138,
+              "confusion_matrix": [
+                [
+                  4931,
+                  69
+                ],
+                [
+                  1026,
+                  3974
+                ]
+              ],
+              "auroc": 0.9880207200000001,
+              "average_precision": 0.986802780711928
+            }
+          }
+        },
+        "0.80": {
+          "threshold": 0.43533981822749246,
+          "mean_domain_auroc": 0.96536188,
+          "worst_domain_auroc": 0.946327,
+          "domains": {
+            "sid": {
+              "threshold": 0.43533981822749246,
+              "samples": 2000,
+              "balanced_accuracy": 0.8,
+              "f1": 0.8286203941730934,
+              "precision": 0.724887556221889,
+              "recall": 0.967,
+              "false_positive_rate": 0.367,
+              "confusion_matrix": [
+                [
+                  633,
+                  367
+                ],
+                [
+                  33,
+                  967
+                ]
+              ],
+              "auroc": 0.946327,
+              "average_precision": 0.9527379465735069
+            },
+            "cifake": {
+              "threshold": 0.43533981822749246,
+              "samples": 10000,
+              "balanced_accuracy": 0.8867,
+              "f1": 0.8746542759154774,
+              "precision": 0.9787076008913097,
+              "recall": 0.7906,
+              "false_positive_rate": 0.0172,
+              "confusion_matrix": [
+                [
+                  4914,
+                  86
+                ],
+                [
+                  1047,
+                  3953
+                ]
+              ],
+              "auroc": 0.98439676,
+              "average_precision": 0.9829894943502652
+            }
+          }
+        },
+        "0.85": {
+          "threshold": 0.42117770329917237,
+          "mean_domain_auroc": 0.96284616,
+          "worst_domain_auroc": 0.9470229999999998,
+          "domains": {
+            "sid": {
+              "threshold": 0.42117770329917237,
+              "samples": 2000,
+              "balanced_accuracy": 0.8009999999999999,
+              "f1": 0.829477292202228,
+              "precision": 0.7256371814092953,
+              "recall": 0.968,
+              "false_positive_rate": 0.366,
+              "confusion_matrix": [
+                [
+                  634,
+                  366
+                ],
+                [
+                  32,
+                  968
+                ]
+              ],
+              "auroc": 0.9470229999999998,
+              "average_precision": 0.953276137417561
+            },
+            "cifake": {
+              "threshold": 0.42117770329917237,
+              "samples": 10000,
+              "balanced_accuracy": 0.8774,
+              "f1": 0.8636869023793641,
+              "precision": 0.972458688032048,
+              "recall": 0.7768,
+              "false_positive_rate": 0.022,
+              "confusion_matrix": [
+                [
+                  4890,
+                  110
+                ],
+                [
+                  1116,
+                  3884
+                ]
+              ],
+              "auroc": 0.9786693200000001,
+              "average_precision": 0.9772112233416356
+            }
+          }
+        },
+        "0.90": {
+          "threshold": 0.425248939253399,
+          "mean_domain_auroc": 0.95864842,
+          "worst_domain_auroc": 0.9475009999999999,
+          "domains": {
+            "sid": {
+              "threshold": 0.425248939253399,
+              "samples": 2000,
+              "balanced_accuracy": 0.8274999999999999,
+              "f1": 0.8480845442536328,
+              "precision": 0.7576711250983478,
+              "recall": 0.963,
+              "false_positive_rate": 0.308,
+              "confusion_matrix": [
+                [
+                  692,
+                  308
+                ],
+                [
+                  37,
+                  963
+                ]
+              ],
+              "auroc": 0.9475009999999999,
+              "average_precision": 0.9536342447086052
+            },
+            "cifake": {
+              "threshold": 0.425248939253399,
+              "samples": 10000,
+              "balanced_accuracy": 0.8455999999999999,
+              "f1": 0.8217913204062789,
+              "precision": 0.9716157205240175,
+              "recall": 0.712,
+              "false_positive_rate": 0.0208,
+              "confusion_matrix": [
+                [
+                  4896,
+                  104
+                ],
+                [
+                  1440,
+                  3560
+                ]
+              ],
+              "auroc": 0.96979584,
+              "average_precision": 0.9686953239625831
+            }
+          }
+        },
+        "0.95": {
+          "threshold": 0.4118648362826321,
+          "mean_domain_auroc": 0.9521951999999999,
+          "worst_domain_auroc": 0.9478329999999999,
+          "domains": {
+            "sid": {
+              "threshold": 0.4118648362826321,
+              "samples": 2000,
+              "balanced_accuracy": 0.8265,
+              "f1": 0.8473383194016718,
+              "precision": 0.7564807541241163,
+              "recall": 0.963,
+              "false_positive_rate": 0.31,
+              "confusion_matrix": [
+                [
+                  690,
+                  310
+                ],
+                [
+                  37,
+                  963
+                ]
+              ],
+              "auroc": 0.9478329999999999,
+              "average_precision": 0.9538999444342684
+            },
+            "cifake": {
+              "threshold": 0.4118648362826321,
+              "samples": 10000,
+              "balanced_accuracy": 0.8357,
+              "f1": 0.8103428373542653,
+              "precision": 0.9582309582309583,
+              "recall": 0.702,
+              "false_positive_rate": 0.0306,
+              "confusion_matrix": [
+                [
+                  4847,
+                  153
+                ],
+                [
+                  1490,
+                  3510
+                ]
+              ],
+              "auroc": 0.9565573999999999,
+              "average_precision": 0.9567617162074437
+            }
+          }
+        },
+        "1.00": {
+          "threshold": 0.39686593098754214,
+          "mean_domain_auroc": 0.9429265899999999,
+          "worst_domain_auroc": 0.9376716799999999,
+          "domains": {
+            "sid": {
+              "threshold": 0.39686593098754214,
+              "samples": 2000,
+              "balanced_accuracy": 0.823,
+              "f1": 0.8447368421052631,
+              "precision": 0.75234375,
+              "recall": 0.963,
+              "false_positive_rate": 0.317,
+              "confusion_matrix": [
+                [
+                  683,
+                  317
+                ],
+                [
+                  37,
+                  963
+                ]
+              ],
+              "auroc": 0.9481814999999999,
+              "average_precision": 0.9541736970863913
+            },
+            "cifake": {
+              "threshold": 0.39686593098754214,
+              "samples": 10000,
+              "balanced_accuracy": 0.8274999999999999,
+              "f1": 0.8025186033199772,
+              "precision": 0.9384203480589023,
+              "recall": 0.701,
+              "false_positive_rate": 0.046,
+              "confusion_matrix": [
+                [
+                  4770,
+                  230
+                ],
+                [
+                  1495,
+                  3505
+                ]
+              ],
+              "auroc": 0.9376716799999999,
+              "average_precision": 0.940872653409493
+            }
+          }
+        }
+      }
+    },
+    "trimmed_mean": {
+      "native_thresholds": {
+        "sid": 0.4856400298408816,
+        "cifake": 0.4092753715997404
+      },
+      "native_scales": {
+        "sid": 1.6308962225538786,
+        "cifake": 2.8756278588321096
+      },
+      "best_alpha": 0.95,
+      "best": {
+        "threshold": 0.4060858949293195,
+        "mean_domain_auroc": 0.95338192,
+        "worst_domain_auroc": 0.948031,
+        "domains": {
+          "sid": {
+            "threshold": 0.4060858949293195,
+            "samples": 2000,
+            "balanced_accuracy": 0.819,
+            "f1": 0.8421970357454228,
+            "precision": 0.7465224111282844,
+            "recall": 0.966,
+            "false_positive_rate": 0.328,
+            "confusion_matrix": [
+              [
+                672,
+                328
+              ],
+              [
+                34,
+                966
+              ]
+            ],
+            "auroc": 0.948031,
+            "average_precision": 0.9540047517544339
+          },
+          "cifake": {
+            "threshold": 0.4060858949293195,
+            "samples": 10000,
+            "balanced_accuracy": 0.8496999999999999,
+            "f1": 0.8302653867871259,
+            "precision": 0.9535667963683528,
+            "recall": 0.7352,
+            "false_positive_rate": 0.0358,
+            "confusion_matrix": [
+              [
+                4821,
+                179
+              ],
+              [
+                1324,
+                3676
+              ]
+            ],
+            "auroc": 0.95873284,
+            "average_precision": 0.9590828477251011
+          }
+        }
+      },
+      "candidates": {
+        "0.50": {
+          "threshold": 0.5552448089437666,
+          "mean_domain_auroc": 0.9658189999999999,
+          "worst_domain_auroc": 0.9362969999999998,
+          "domains": {
+            "sid": {
+              "threshold": 0.5552448089437666,
+              "samples": 2000,
+              "balanced_accuracy": 0.8095,
+              "f1": 0.8313413014608234,
+              "precision": 0.7458300238284352,
+              "recall": 0.939,
+              "false_positive_rate": 0.32,
+              "confusion_matrix": [
+                [
+                  680,
+                  320
+                ],
+                [
+                  61,
+                  939
+                ]
+              ],
+              "auroc": 0.9362969999999998,
+              "average_precision": 0.945720521630353
+            },
+            "cifake": {
+              "threshold": 0.5552448089437666,
+              "samples": 10000,
+              "balanced_accuracy": 0.8765000000000001,
+              "f1": 0.8595154134910704,
+              "precision": 0.9965708256396729,
+              "recall": 0.7556,
+              "false_positive_rate": 0.0026,
+              "confusion_matrix": [
+                [
+                  4987,
+                  13
+                ],
+                [
+                  1222,
+                  3778
+                ]
+              ],
+              "auroc": 0.9953409999999999,
+              "average_precision": 0.99507637288556
+            }
+          }
+        },
+        "0.55": {
+          "threshold": 0.5490037293589275,
+          "mean_domain_auroc": 0.9669435,
+          "worst_domain_auroc": 0.939217,
+          "domains": {
+            "sid": {
+              "threshold": 0.5490037293589275,
+              "samples": 2000,
+              "balanced_accuracy": 0.829,
+              "f1": 0.8453887884267631,
+              "precision": 0.7714521452145214,
+              "recall": 0.935,
+              "false_positive_rate": 0.277,
+              "confusion_matrix": [
+                [
+                  723,
+                  277
+                ],
+                [
+                  65,
+                  935
+                ]
+              ],
+              "auroc": 0.939217,
+              "average_precision": 0.9477144871865036
+            },
+            "cifake": {
+              "threshold": 0.5490037293589275,
+              "samples": 10000,
+              "balanced_accuracy": 0.8567,
+              "f1": 0.8332363551728151,
+              "precision": 0.9963818536042305,
+              "recall": 0.716,
+              "false_positive_rate": 0.0026,
+              "confusion_matrix": [
+                [
+                  4987,
+                  13
+                ],
+                [
+                  1420,
+                  3580
+                ]
+              ],
+              "auroc": 0.99467,
+              "average_precision": 0.9943199928163649
+            }
+          }
+        },
+        "0.60": {
+          "threshold": 0.5083280549185469,
+          "mean_domain_auroc": 0.96762566,
+          "worst_domain_auroc": 0.941489,
+          "domains": {
+            "sid": {
+              "threshold": 0.5083280549185469,
+              "samples": 2000,
+              "balanced_accuracy": 0.7935,
+              "f1": 0.8229747106729532,
+              "precision": 0.7201800450112528,
+              "recall": 0.96,
+              "false_positive_rate": 0.373,
+              "confusion_matrix": [
+                [
+                  627,
+                  373
+                ],
+                [
+                  40,
+                  960
+                ]
+              ],
+              "auroc": 0.941489,
+              "average_precision": 0.9492932035464521
+            },
+            "cifake": {
+              "threshold": 0.5083280549185469,
+              "samples": 10000,
+              "balanced_accuracy": 0.8946,
+              "f1": 0.8831744624251829,
+              "precision": 0.9905519641969169,
+              "recall": 0.7968,
+              "false_positive_rate": 0.0076,
+              "confusion_matrix": [
+                [
+                  4962,
+                  38
+                ],
+                [
+                  1016,
+                  3984
+                ]
+              ],
+              "auroc": 0.9937623200000001,
+              "average_precision": 0.9932903793844421
+            }
+          }
+        },
+        "0.65": {
+          "threshold": 0.49164230607354353,
+          "mean_domain_auroc": 0.9678603000000001,
+          "worst_domain_auroc": 0.943199,
+          "domains": {
+            "sid": {
+              "threshold": 0.49164230607354353,
+              "samples": 2000,
+              "balanced_accuracy": 0.7945,
+              "f1": 0.823982869379015,
+              "precision": 0.7205992509363296,
+              "recall": 0.962,
+              "false_positive_rate": 0.373,
+              "confusion_matrix": [
+                [
+                  627,
+                  373
+                ],
+                [
+                  38,
+                  962
+                ]
+              ],
+              "auroc": 0.943199,
+              "average_precision": 0.9504689879065312
+            },
+            "cifake": {
+              "threshold": 0.49164230607354353,
+              "samples": 10000,
+              "balanced_accuracy": 0.8929,
+              "f1": 0.8813559322033898,
+              "precision": 0.9878321331015645,
+              "recall": 0.7956,
+              "false_positive_rate": 0.0098,
+              "confusion_matrix": [
+                [
+                  4951,
+                  49
+                ],
+                [
+                  1022,
+                  3978
+                ]
+              ],
+              "auroc": 0.9925216000000001,
+              "average_precision": 0.9918903907224271
+            }
+          }
+        },
+        "0.70": {
+          "threshold": 0.48410859940307305,
+          "mean_domain_auroc": 0.9676693000000001,
+          "worst_domain_auroc": 0.944542,
+          "domains": {
+            "sid": {
+              "threshold": 0.48410859940307305,
+              "samples": 2000,
+              "balanced_accuracy": 0.8125,
+              "f1": 0.8368856024358416,
+              "precision": 0.7405696689761355,
+              "recall": 0.962,
+              "false_positive_rate": 0.337,
+              "confusion_matrix": [
+                [
+                  663,
+                  337
+                ],
+                [
+                  38,
+                  962
+                ]
+              ],
+              "auroc": 0.944542,
+              "average_precision": 0.9514033752986221
+            },
+            "cifake": {
+              "threshold": 0.48410859940307305,
+              "samples": 10000,
+              "balanced_accuracy": 0.8761,
+              "f1": 0.8601737952826994,
+              "precision": 0.987049987049987,
+              "recall": 0.7622,
+              "false_positive_rate": 0.01,
+              "confusion_matrix": [
+                [
+                  4950,
+                  50
+                ],
+                [
+                  1189,
+                  3811
+                ]
+              ],
+              "auroc": 0.9907966000000001,
+              "average_precision": 0.9899842919013125
+            }
+          }
+        },
+        "0.75": {
+          "threshold": 0.4676714862739742,
+          "mean_domain_auroc": 0.96697448,
+          "worst_domain_auroc": 0.94563,
+          "domains": {
+            "sid": {
+              "threshold": 0.4676714862739742,
+              "samples": 2000,
+              "balanced_accuracy": 0.8125,
+              "f1": 0.8370273794002607,
+              "precision": 0.7401998462720983,
+              "recall": 0.963,
+              "false_positive_rate": 0.338,
+              "confusion_matrix": [
+                [
+                  662,
+                  338
+                ],
+                [
+                  37,
+                  963
+                ]
+              ],
+              "auroc": 0.94563,
+              "average_precision": 0.9522010834419505
+            },
+            "cifake": {
+              "threshold": 0.4676714862739742,
+              "samples": 10000,
+              "balanced_accuracy": 0.8737,
+              "f1": 0.8573042594057169,
+              "precision": 0.9851986497013763,
+              "recall": 0.7588,
+              "false_positive_rate": 0.0114,
+              "confusion_matrix": [
+                [
+                  4943,
+                  57
+                ],
+                [
+                  1206,
+                  3794
+                ]
+              ],
+              "auroc": 0.98831896,
+              "average_precision": 0.9873219500159676
+            }
+          }
+        },
+        "0.80": {
+          "threshold": 0.4463044102178487,
+          "mean_domain_auroc": 0.96557578,
+          "worst_domain_auroc": 0.946486,
+          "domains": {
+            "sid": {
+              "threshold": 0.4463044102178487,
+              "samples": 2000,
+              "balanced_accuracy": 0.8069999999999999,
+              "f1": 0.8334771354616048,
+              "precision": 0.7329286798179059,
+              "recall": 0.966,
+              "false_positive_rate": 0.352,
+              "confusion_matrix": [
+                [
+                  648,
+                  352
+                ],
+                [
+                  34,
+                  966
+                ]
+              ],
+              "auroc": 0.946486,
+              "average_precision": 0.9528162094676116
+            },
+            "cifake": {
+              "threshold": 0.4463044102178487,
+              "samples": 10000,
+              "balanced_accuracy": 0.8785000000000001,
+              "f1": 0.8640179071068831,
+              "precision": 0.9809402795425667,
+              "recall": 0.772,
+              "false_positive_rate": 0.015,
+              "confusion_matrix": [
+                [
+                  4925,
+                  75
+                ],
+                [
+                  1140,
+                  3860
+                ]
+              ],
+              "auroc": 0.9846655599999999,
+              "average_precision": 0.9835191393359735
+            }
+          }
+        },
+        "0.85": {
+          "threshold": 0.43145033311538994,
+          "mean_domain_auroc": 0.96313614,
+          "worst_domain_auroc": 0.947119,
+          "domains": {
+            "sid": {
+              "threshold": 0.43145033311538994,
+              "samples": 2000,
+              "balanced_accuracy": 0.81,
+              "f1": 0.8357821953327571,
+              "precision": 0.7359208523592086,
+              "recall": 0.967,
+              "false_positive_rate": 0.347,
+              "confusion_matrix": [
+                [
+                  653,
+                  347
+                ],
+                [
+                  33,
+                  967
+                ]
+              ],
+              "auroc": 0.947119,
+              "average_precision": 0.9532909785185828
+            },
+            "cifake": {
+              "threshold": 0.43145033311538994,
+              "samples": 10000,
+              "balanced_accuracy": 0.8723000000000001,
+              "f1": 0.8567582725743129,
+              "precision": 0.9754789272030652,
+              "recall": 0.7638,
+              "false_positive_rate": 0.0192,
+              "confusion_matrix": [
+                [
+                  4904,
+                  96
+                ],
+                [
+                  1181,
+                  3819
+                ]
+              ],
+              "auroc": 0.97915328,
+              "average_precision": 0.9780094144383638
+            }
+          }
+        },
+        "0.90": {
+          "threshold": 0.41306908163811346,
+          "mean_domain_auroc": 0.95925884,
+          "worst_domain_auroc": 0.9476260000000001,
+          "domains": {
+            "sid": {
+              "threshold": 0.41306908163811346,
+              "samples": 2000,
+              "balanced_accuracy": 0.8069999999999999,
+              "f1": 0.8336206896551724,
+              "precision": 0.7325757575757575,
+              "recall": 0.967,
+              "false_positive_rate": 0.353,
+              "confusion_matrix": [
+                [
+                  647,
+                  353
+                ],
+                [
+                  33,
+                  967
+                ]
+              ],
+              "auroc": 0.9476260000000001,
+              "average_precision": 0.9536919967897135
+            },
+            "cifake": {
+              "threshold": 0.41306908163811346,
+              "samples": 10000,
+              "balanced_accuracy": 0.8695999999999999,
+              "f1": 0.8548853772535054,
+              "precision": 0.9636226793778224,
+              "recall": 0.7682,
+              "false_positive_rate": 0.029,
+              "confusion_matrix": [
+                [
+                  4855,
+                  145
+                ],
+                [
+                  1159,
+                  3841
+                ]
+              ],
+              "auroc": 0.9708916799999999,
+              "average_precision": 0.9701022298912961
+            }
+          }
+        },
+        "0.95": {
+          "threshold": 0.4060858949293195,
+          "mean_domain_auroc": 0.95338192,
+          "worst_domain_auroc": 0.948031,
+          "domains": {
+            "sid": {
+              "threshold": 0.4060858949293195,
+              "samples": 2000,
+              "balanced_accuracy": 0.819,
+              "f1": 0.8421970357454228,
+              "precision": 0.7465224111282844,
+              "recall": 0.966,
+              "false_positive_rate": 0.328,
+              "confusion_matrix": [
+                [
+                  672,
+                  328
+                ],
+                [
+                  34,
+                  966
+                ]
+              ],
+              "auroc": 0.948031,
+              "average_precision": 0.9540047517544339
+            },
+            "cifake": {
+              "threshold": 0.4060858949293195,
+              "samples": 10000,
+              "balanced_accuracy": 0.8496999999999999,
+              "f1": 0.8302653867871259,
+              "precision": 0.9535667963683528,
+              "recall": 0.7352,
+              "false_positive_rate": 0.0358,
+              "confusion_matrix": [
+                [
+                  4821,
+                  179
+                ],
+                [
+                  1324,
+                  3676
+                ]
+              ],
+              "auroc": 0.95873284,
+              "average_precision": 0.9590828477251011
+            }
+          }
+        },
+        "1.00": {
+          "threshold": 0.39420696380285614,
+          "mean_domain_auroc": 0.9449582799999999,
+          "worst_domain_auroc": 0.94156356,
+          "domains": {
+            "sid": {
+              "threshold": 0.39420696380285614,
+              "samples": 2000,
+              "balanced_accuracy": 0.8225,
+              "f1": 0.8446389496717724,
+              "precision": 0.7509727626459144,
+              "recall": 0.965,
+              "false_positive_rate": 0.32,
+              "confusion_matrix": [
+                [
+                  680,
+                  320
+                ],
+                [
+                  35,
+                  965
+                ]
+              ],
+              "auroc": 0.9483529999999999,
+              "average_precision": 0.9542673537954338
+            },
+            "cifake": {
+              "threshold": 0.39420696380285614,
+              "samples": 10000,
+              "balanced_accuracy": 0.8354999999999999,
+              "f1": 0.8142292490118577,
+              "precision": 0.9351491569390402,
+              "recall": 0.721,
+              "false_positive_rate": 0.05,
+              "confusion_matrix": [
+                [
+                  4750,
+                  250
+                ],
+                [
+                  1395,
+                  3605
+                ]
+              ],
+              "auroc": 0.94156356,
+              "average_precision": 0.9445099531454172
+            }
+          }
+        }
+      }
+    }
+  }
+}
