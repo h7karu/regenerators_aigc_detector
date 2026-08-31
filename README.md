@@ -1,5 +1,5 @@
 # regenerators_aigc_detector
-This repository contains team regenerator's Artificial Intelligence Generated Content (AIGC) detector for TikTok TechJam 2026.
+This repository contains team regenerator's Artificial Intelligence Generated Content (AIGC) detector for TikTok TechJam 2026. You may click Run All to observe the complete pipeline: dataset inspection, robustness transforms, dual-branch training, clean-versus-transformed evaluation, branch ablation, inference outputs, and representative errors.
 
 ## Project overview
 
@@ -60,7 +60,24 @@ settings it will be tested on.
 ## Quickstart (first time pulling this repo)
 
 `data/`, `models/`, and `demo_images/` are all gitignored — a fresh pull gives
-you code only. Run these in order from the repo root:
+you code only. 
+
+If you already have `models/notebook_dual_branch.joblib` in `models/`, complete steps 1–2. Then choose what you want to do:
+
+- **Use the browser UI:** skip steps 3–5 and follow
+  [Run the local Gradio interface](#run-the-local-gradio-interface).
+- **Score your own images:** skip steps 3–5 and follow
+  [Predict on a directory](#predict-on-a-directory-under-deliverable-552).
+- **Use the walkthrough notebook:** open it at step 5, but skip the training
+  cell under **“## 5. Train”**. You may run its later sample-image cells. Its
+  evaluation section needs test datasets, so download data if you want to run it.
+- **Evaluate the saved model:** download a test dataset, skip training, then
+  follow [Evaluate robustness](#evaluate-robustness).
+
+In every case above, `models/notebook_dual_branch.joblib` is the saved model that is loaded; you do not need to train it again.
+
+
+If you do not have `models/notebook_dual_branch.joblib` in `models/`, complete steps 1–5.
 
 **Macs/Linux**:
 ```bash
@@ -78,7 +95,7 @@ chmod +x scripts/*.sh
 ./scripts/download_sid_set.sh
 ./scripts/download_wildfake.sh
 
-# 4. Train a model — this is what the notebook and infer/evaluate expect to find
+# 4. Train a model only when you do not already have a saved checkpoint (.joblib)
 python -m aigc_detector.train \
     --data-dir data/cifake/train \
     --data-dir data/wildfake/train \
@@ -86,10 +103,26 @@ python -m aigc_detector.train \
     --max-per-class 150 --augment-copies 2 \
     --output models/notebook_dual_branch.joblib
 
-# 5. Open the notebook
+# 5. Run directory inference on held-out WildFake test images.
+# This writes one JSON record per image: {"image_path": "...", "pred": ...}.
+python -m aigc_detector.infer \
+    --input-dir data/wildfake/test/REAL \
+    --checkpoint models/notebook_dual_branch.joblib \
+    --output reports/wildfake_real_predictions.json
+# You may repeat this for different image directories after the --input-dir (eg.  data/wildfake/test/FAKE)
+
+# View the JSON output for the input images.
+cat reports/wildfake_real_predictions.json
+
+# Optional: score held-out AIGC images as well.
+python -m aigc_detector.infer \
+    --input-dir data/wildfake/test/FAKE \
+    --checkpoint models/notebook_dual_branch.joblib \
+    --output reports/wildfake_fake_predictions.json
+
+# Optional: Open the end-to-end walkthrough notebook.
 jupyter notebook notebooks/aigc_detector_walkthrough.ipynb
-# Run cells top to bottom. The "try it yourself" cells near the end need
-# MODEL_PATH pointed at models/notebook_dual_branch.joblib (already the default).
+# In the notebook UI, click "Run All" to run all cells from top to bottom.
 ```
 
 **Windows**:
@@ -118,7 +151,7 @@ sed -i 's/\r$//' scripts/download_cifake.sh
 sed -i 's/\r$//' scripts/download_sid_set.sh
 sed -i 's/\r$//' scripts/download_wildfake.sh
 
-# 4. Train a model — this is what the notebook and infer/evaluate expect to find
+# 4. Train a model only when you do not already have a saved checkpoint (.joblib)
 .\venv\Scripts\python.exe -m aigc_detector.train `
     --data-dir data/cifake/train `
     --data-dir data/wildfake/train `
@@ -126,10 +159,27 @@ sed -i 's/\r$//' scripts/download_wildfake.sh
     --max-per-class 150 --augment-copies 2 `
     --output models/notebook_dual_branch.joblib
 
-# 5. Open the notebook
-jupyter notebook notebooks/aigc_detector_walkthrough.ipynb
-# Run cells top to bottom. The "try it yourself" cells near the end need
-# MODEL_PATH pointed at models/notebook_dual_branch.joblib (already the default).
+# 5. Run directory inference on held-out WildFake test images.
+# This writes one JSON record per image: {"image_path": "...", "pred": ...}.
+python -m aigc_detector.infer `
+    --input-dir data\wildfake\test\REAL `
+    --checkpoint models\notebook_dual_branch.joblib `
+    --output reports\wildfake_real_predictions.json
+
+# You may repeat this for different image directories after the --input-dir (eg.  data/wildfake/test/FAKE)
+
+# View the JSON output of the input images.
+Get-Content .\reports\wildfake_real_predictions.json
+
+# Optional: score held-out AIGC images as well.
+python -m aigc_detector.infer `
+    --input-dir data\wildfake\test\FAKE `
+    --checkpoint models\notebook_dual_branch.joblib `
+    --output reports\wildfake_fake_predictions.json
+
+# Optional: Open the end-to-end walkthrough notebook.
+jupyter notebook notebooks\aigc_detector_walkthrough.ipynb
+# In the notebook UI, click "Run All" to run all cells from top to bottom.
 ```
 
 That's the whole path from a clean pull to a working notebook. Details on each
