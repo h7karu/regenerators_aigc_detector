@@ -1,0 +1,605 @@
+{
+  "split": "test",
+  "checkpoint": "checkpoints/full_cifake_lora/full_cifake_lora_best.pt",
+  "manifest": "data/manifests/cifake_test.csv",
+  "threshold": 0.8002490401268005,
+  "transforms": {
+    "clean": {
+      "threshold": 0.8002490401268005,
+      "samples": 20000,
+      "balanced_accuracy": 0.9742500000000001,
+      "f1": 0.9743997613958344,
+      "precision": 0.9687654443016704,
+      "recall": 0.9801,
+      "false_positive_rate": 0.0316,
+      "confusion_matrix": [
+        [
+          9684,
+          316
+        ],
+        [
+          199,
+          9801
+        ]
+      ],
+      "auroc": 0.9969958099999999,
+      "average_precision": 0.996950598164498,
+      "subgroups": {
+        "0": {
+          "samples": 10000,
+          "binary_label": 0,
+          "generator": "cifar10",
+          "accuracy": 0.9684,
+          "predicted_aigc_rate": 0.0316,
+          "mean_probability": 0.13760676980018616
+        },
+        "1": {
+          "samples": 10000,
+          "binary_label": 1,
+          "generator": "stable_diffusion_1_4",
+          "accuracy": 0.9801,
+          "predicted_aigc_rate": 0.9801,
+          "mean_probability": 0.9505024552345276
+        }
+      }
+    },
+    "jpeg_90": {
+      "threshold": 0.8002490401268005,
+      "samples": 20000,
+      "balanced_accuracy": 0.97405,
+      "f1": 0.9741237473201376,
+      "precision": 0.9713632295913294,
+      "recall": 0.9769,
+      "false_positive_rate": 0.0288,
+      "confusion_matrix": [
+        [
+          9712,
+          288
+        ],
+        [
+          231,
+          9769
+        ]
+      ],
+      "auroc": 0.99696017,
+      "average_precision": 0.9969242110861809,
+      "subgroups": {
+        "0": {
+          "samples": 10000,
+          "binary_label": 0,
+          "generator": "cifar10",
+          "accuracy": 0.9712,
+          "predicted_aigc_rate": 0.0288,
+          "mean_probability": 0.1330031454563141
+        },
+        "1": {
+          "samples": 10000,
+          "binary_label": 1,
+          "generator": "stable_diffusion_1_4",
+          "accuracy": 0.9769,
+          "predicted_aigc_rate": 0.9769,
+          "mean_probability": 0.9483996033668518
+        }
+      }
+    },
+    "jpeg_70": {
+      "threshold": 0.8002490401268005,
+      "samples": 20000,
+      "balanced_accuracy": 0.9721500000000001,
+      "f1": 0.9723367270921282,
+      "precision": 0.965860878145042,
+      "recall": 0.9789,
+      "false_positive_rate": 0.0346,
+      "confusion_matrix": [
+        [
+          9654,
+          346
+        ],
+        [
+          211,
+          9789
+        ]
+      ],
+      "auroc": 0.9965824849999999,
+      "average_precision": 0.9965533308693657,
+      "subgroups": {
+        "0": {
+          "samples": 10000,
+          "binary_label": 0,
+          "generator": "cifar10",
+          "accuracy": 0.9654,
+          "predicted_aigc_rate": 0.0346,
+          "mean_probability": 0.14575766026973724
+        },
+        "1": {
+          "samples": 10000,
+          "binary_label": 1,
+          "generator": "stable_diffusion_1_4",
+          "accuracy": 0.9789,
+          "predicted_aigc_rate": 0.9789,
+          "mean_probability": 0.9491638541221619
+        }
+      }
+    },
+    "jpeg_50": {
+      "threshold": 0.8002490401268005,
+      "samples": 20000,
+      "balanced_accuracy": 0.9604,
+      "f1": 0.9600403632694248,
+      "precision": 0.9688391038696538,
+      "recall": 0.9514,
+      "false_positive_rate": 0.0306,
+      "confusion_matrix": [
+        [
+          9694,
+          306
+        ],
+        [
+          486,
+          9514
+        ]
+      ],
+      "auroc": 0.9940677649999998,
+      "average_precision": 0.9939758928288586,
+      "subgroups": {
+        "0": {
+          "samples": 10000,
+          "binary_label": 0,
+          "generator": "cifar10",
+          "accuracy": 0.9694,
+          "predicted_aigc_rate": 0.0306,
+          "mean_probability": 0.14576098322868347
+        },
+        "1": {
+          "samples": 10000,
+          "binary_label": 1,
+          "generator": "stable_diffusion_1_4",
+          "accuracy": 0.9514,
+          "predicted_aigc_rate": 0.9514,
+          "mean_probability": 0.9313383102416992
+        }
+      }
+    },
+    "jpeg_30": {
+      "threshold": 0.8002490401268005,
+      "samples": 20000,
+      "balanced_accuracy": 0.9492499999999999,
+      "f1": 0.9481957842086459,
+      "precision": 0.968310226206609,
+      "recall": 0.9289,
+      "false_positive_rate": 0.0304,
+      "confusion_matrix": [
+        [
+          9696,
+          304
+        ],
+        [
+          711,
+          9289
+        ]
+      ],
+      "auroc": 0.9911486599999999,
+      "average_precision": 0.9912104247909861,
+      "subgroups": {
+        "0": {
+          "samples": 10000,
+          "binary_label": 0,
+          "generator": "cifar10",
+          "accuracy": 0.9696,
+          "predicted_aigc_rate": 0.0304,
+          "mean_probability": 0.13748976588249207
+        },
+        "1": {
+          "samples": 10000,
+          "binary_label": 1,
+          "generator": "stable_diffusion_1_4",
+          "accuracy": 0.9289,
+          "predicted_aigc_rate": 0.9289,
+          "mean_probability": 0.9198874831199646
+        }
+      }
+    },
+    "blur_0.5": {
+      "threshold": 0.8002490401268005,
+      "samples": 20000,
+      "balanced_accuracy": 0.9642,
+      "f1": 0.9631307929969104,
+      "precision": 0.9927813163481953,
+      "recall": 0.9352,
+      "false_positive_rate": 0.0068,
+      "confusion_matrix": [
+        [
+          9932,
+          68
+        ],
+        [
+          648,
+          9352
+        ]
+      ],
+      "auroc": 0.9975730600000001,
+      "average_precision": 0.9976273281996537,
+      "subgroups": {
+        "0": {
+          "samples": 10000,
+          "binary_label": 0,
+          "generator": "cifar10",
+          "accuracy": 0.9932,
+          "predicted_aigc_rate": 0.0068,
+          "mean_probability": 0.07599509507417679
+        },
+        "1": {
+          "samples": 10000,
+          "binary_label": 1,
+          "generator": "stable_diffusion_1_4",
+          "accuracy": 0.9352,
+          "predicted_aigc_rate": 0.9352,
+          "mean_probability": 0.9253685474395752
+        }
+      }
+    },
+    "blur_1.0": {
+      "threshold": 0.8002490401268005,
+      "samples": 20000,
+      "balanced_accuracy": 0.65885,
+      "f1": 0.48228241899992413,
+      "precision": 0.9996854356715948,
+      "recall": 0.3178,
+      "false_positive_rate": 0.0001,
+      "confusion_matrix": [
+        [
+          9999,
+          1
+        ],
+        [
+          6822,
+          3178
+        ]
+      ],
+      "auroc": 0.98037677,
+      "average_precision": 0.9818328222510143,
+      "subgroups": {
+        "0": {
+          "samples": 10000,
+          "binary_label": 0,
+          "generator": "cifar10",
+          "accuracy": 0.9999,
+          "predicted_aigc_rate": 0.0001,
+          "mean_probability": 0.04049035161733627
+        },
+        "1": {
+          "samples": 10000,
+          "binary_label": 1,
+          "generator": "stable_diffusion_1_4",
+          "accuracy": 0.3178,
+          "predicted_aigc_rate": 0.3178,
+          "mean_probability": 0.5128099322319031
+        }
+      }
+    },
+    "blur_2.0": {
+      "threshold": 0.8002490401268005,
+      "samples": 20000,
+      "balanced_accuracy": 0.5719000000000001,
+      "f1": 0.25586650443247,
+      "precision": 0.9774236387782205,
+      "recall": 0.1472,
+      "false_positive_rate": 0.0034,
+      "confusion_matrix": [
+        [
+          9966,
+          34
+        ],
+        [
+          8528,
+          1472
+        ]
+      ],
+      "auroc": 0.8464268450000001,
+      "average_precision": 0.8540094606623818,
+      "subgroups": {
+        "0": {
+          "samples": 10000,
+          "binary_label": 0,
+          "generator": "cifar10",
+          "accuracy": 0.9966,
+          "predicted_aigc_rate": 0.0034,
+          "mean_probability": 0.09978117048740387
+        },
+        "1": {
+          "samples": 10000,
+          "binary_label": 1,
+          "generator": "stable_diffusion_1_4",
+          "accuracy": 0.1472,
+          "predicted_aigc_rate": 0.1472,
+          "mean_probability": 0.3910979926586151
+        }
+      }
+    },
+    "resize_0.5": {
+      "threshold": 0.8002490401268005,
+      "samples": 20000,
+      "balanced_accuracy": 0.8251999999999999,
+      "f1": 0.7884289518276446,
+      "precision": 0.9984671980380135,
+      "recall": 0.6514,
+      "false_positive_rate": 0.001,
+      "confusion_matrix": [
+        [
+          9990,
+          10
+        ],
+        [
+          3486,
+          6514
+        ]
+      ],
+      "auroc": 0.9909521000000001,
+      "average_precision": 0.9913189647173748,
+      "subgroups": {
+        "0": {
+          "samples": 10000,
+          "binary_label": 0,
+          "generator": "cifar10",
+          "accuracy": 0.999,
+          "predicted_aigc_rate": 0.001,
+          "mean_probability": 0.05346610024571419
+        },
+        "1": {
+          "samples": 10000,
+          "binary_label": 1,
+          "generator": "stable_diffusion_1_4",
+          "accuracy": 0.6514,
+          "predicted_aigc_rate": 0.6514,
+          "mean_probability": 0.7610878944396973
+        }
+      }
+    },
+    "resize_0.25": {
+      "threshold": 0.8002490401268005,
+      "samples": 20000,
+      "balanced_accuracy": 0.5421,
+      "f1": 0.15641120117907148,
+      "precision": 0.991822429906542,
+      "recall": 0.0849,
+      "false_positive_rate": 0.0007,
+      "confusion_matrix": [
+        [
+          9993,
+          7
+        ],
+        [
+          9151,
+          849
+        ]
+      ],
+      "auroc": 0.8779841549999999,
+      "average_precision": 0.8826269325064029,
+      "subgroups": {
+        "0": {
+          "samples": 10000,
+          "binary_label": 0,
+          "generator": "cifar10",
+          "accuracy": 0.9993,
+          "predicted_aigc_rate": 0.0007,
+          "mean_probability": 0.05620927736163139
+        },
+        "1": {
+          "samples": 10000,
+          "binary_label": 1,
+          "generator": "stable_diffusion_1_4",
+          "accuracy": 0.0849,
+          "predicted_aigc_rate": 0.0849,
+          "mean_probability": 0.2794569432735443
+        }
+      }
+    },
+    "noise_0.02": {
+      "threshold": 0.8002490401268005,
+      "samples": 20000,
+      "balanced_accuracy": 0.96435,
+      "f1": 0.9637390021868484,
+      "precision": 0.9805443444064991,
+      "recall": 0.9475,
+      "false_positive_rate": 0.0188,
+      "confusion_matrix": [
+        [
+          9812,
+          188
+        ],
+        [
+          525,
+          9475
+        ]
+      ],
+      "auroc": 0.995481065,
+      "average_precision": 0.995628762777958,
+      "subgroups": {
+        "0": {
+          "samples": 10000,
+          "binary_label": 0,
+          "generator": "cifar10",
+          "accuracy": 0.9812,
+          "predicted_aigc_rate": 0.0188,
+          "mean_probability": 0.11541549116373062
+        },
+        "1": {
+          "samples": 10000,
+          "binary_label": 1,
+          "generator": "stable_diffusion_1_4",
+          "accuracy": 0.9475,
+          "predicted_aigc_rate": 0.9475,
+          "mean_probability": 0.9282854199409485
+        }
+      }
+    },
+    "noise_0.05": {
+      "threshold": 0.8002490401268005,
+      "samples": 20000,
+      "balanced_accuracy": 0.9259999999999999,
+      "f1": 0.9210413999146394,
+      "precision": 0.9871912168344007,
+      "recall": 0.8632,
+      "false_positive_rate": 0.0112,
+      "confusion_matrix": [
+        [
+          9888,
+          112
+        ],
+        [
+          1368,
+          8632
+        ]
+      ],
+      "auroc": 0.99029887,
+      "average_precision": 0.9908039105213122,
+      "subgroups": {
+        "0": {
+          "samples": 10000,
+          "binary_label": 0,
+          "generator": "cifar10",
+          "accuracy": 0.9888,
+          "predicted_aigc_rate": 0.0112,
+          "mean_probability": 0.11167072504758835
+        },
+        "1": {
+          "samples": 10000,
+          "binary_label": 1,
+          "generator": "stable_diffusion_1_4",
+          "accuracy": 0.8632,
+          "predicted_aigc_rate": 0.8632,
+          "mean_probability": 0.8771555423736572
+        }
+      }
+    },
+    "noise_0.10": {
+      "threshold": 0.8002490401268005,
+      "samples": 20000,
+      "balanced_accuracy": 0.839,
+      "f1": 0.8117399438727783,
+      "precision": 0.9771959459459459,
+      "recall": 0.6942,
+      "false_positive_rate": 0.0162,
+      "confusion_matrix": [
+        [
+          9838,
+          162
+        ],
+        [
+          3058,
+          6942
+        ]
+      ],
+      "auroc": 0.9620662449999999,
+      "average_precision": 0.9648585487148459,
+      "subgroups": {
+        "0": {
+          "samples": 10000,
+          "binary_label": 0,
+          "generator": "cifar10",
+          "accuracy": 0.9838,
+          "predicted_aigc_rate": 0.0162,
+          "mean_probability": 0.2127310335636139
+        },
+        "1": {
+          "samples": 10000,
+          "binary_label": 1,
+          "generator": "stable_diffusion_1_4",
+          "accuracy": 0.6942,
+          "predicted_aigc_rate": 0.6942,
+          "mean_probability": 0.80183345079422
+        }
+      }
+    },
+    "color_0.2": {
+      "threshold": 0.8002490401268005,
+      "samples": 20000,
+      "balanced_accuracy": 0.97405,
+      "f1": 0.9739209084970605,
+      "precision": 0.9787900212099788,
+      "recall": 0.9691,
+      "false_positive_rate": 0.021,
+      "confusion_matrix": [
+        [
+          9790,
+          210
+        ],
+        [
+          309,
+          9691
+        ]
+      ],
+      "auroc": 0.99710588,
+      "average_precision": 0.997121652395897,
+      "subgroups": {
+        "0": {
+          "samples": 10000,
+          "binary_label": 0,
+          "generator": "cifar10",
+          "accuracy": 0.979,
+          "predicted_aigc_rate": 0.021,
+          "mean_probability": 0.11259006708860397
+        },
+        "1": {
+          "samples": 10000,
+          "binary_label": 1,
+          "generator": "stable_diffusion_1_4",
+          "accuracy": 0.9691,
+          "predicted_aigc_rate": 0.9691,
+          "mean_probability": 0.9432101845741272
+        }
+      }
+    },
+    "crop_0.8": {
+      "threshold": 0.8002490401268005,
+      "samples": 20000,
+      "balanced_accuracy": 0.95165,
+      "f1": 0.9495750117328049,
+      "precision": 0.9921542987904544,
+      "recall": 0.9105,
+      "false_positive_rate": 0.0072,
+      "confusion_matrix": [
+        [
+          9928,
+          72
+        ],
+        [
+          895,
+          9105
+        ]
+      ],
+      "auroc": 0.9964400950000001,
+      "average_precision": 0.9965659622245644,
+      "subgroups": {
+        "0": {
+          "samples": 10000,
+          "binary_label": 0,
+          "generator": "cifar10",
+          "accuracy": 0.9928,
+          "predicted_aigc_rate": 0.0072,
+          "mean_probability": 0.07789295166730881
+        },
+        "1": {
+          "samples": 10000,
+          "binary_label": 1,
+          "generator": "stable_diffusion_1_4",
+          "accuracy": 0.9105,
+          "predicted_aigc_rate": 0.9105,
+          "mean_probability": 0.91115802526474
+        }
+      }
+    }
+  },
+  "summary": {
+    "mean_auroc": 0.9740306650000001,
+    "worst_auroc": 0.8464268450000001,
+    "worst_auroc_transform": "blur_2.0",
+    "mean_balanced_accuracy": 0.8698266666666667,
+    "worst_balanced_accuracy": 0.5421,
+    "worst_balanced_accuracy_transform": "resize_0.25",
+    "mean_transformed_auroc": 0.9723902975,
+    "mean_transformed_balanced_accuracy": 0.8623678571428572,
+    "clean_to_worst_auroc_drop": 0.15056896499999983,
+    "clean_to_worst_balanced_accuracy_drop": 0.43215000000000003
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "threshold": 0.982440173625946,
+  "target_fpr": 0.05,
+  "n_false_positives": 5,
+  "n_false_negatives": 38,
+  "false_positives": [
+    {
+      "image_path": "data/cifake/test/REAL/0381 (2).jpg",
+      "true_label": "REAL",
+      "pred_prob": 0.9998931884765625
+    },
+    {
+      "image_path": "data/cifake/test/REAL/0261 (6).jpg",
+      "true_label": "REAL",
+      "pred_prob": 0.9914389848709106
+    },
+    {
+      "image_path": "data/cifake/test/REAL/0691 (3).jpg",
+      "true_label": "REAL",
+      "pred_prob": 0.9860160946846008
+    },
+    {
+      "image_path": "data/cifake/test/REAL/0967 (5).jpg",
+      "true_label": "REAL",
+      "pred_prob": 0.9846742153167725
+    },
+    {
+      "image_path": "data/cifake/test/REAL/0919 (6).jpg",
+      "true_label": "REAL",
+      "pred_prob": 0.9831905364990234
+    }
+  ],
+  "false_negatives": [
+    {
+      "image_path": "data/cifake/test/FAKE/888 (9).jpg",
+      "true_label": "FAKE",
+      "pred_prob": 8.567571967432741e-06
+    },
+    {
+      "image_path": "data/cifake/test/FAKE/990 (4).jpg",
+      "true_label": "FAKE",
+      "pred_prob": 2.229322308267001e-05
+    },
+    {
+      "image_path": "data/cifake/test/FAKE/879 (6).jpg",
+      "true_label": "FAKE",
+      "pred_prob": 0.0008314516744576395
+    },
+    {
+      "image_path": "data/cifake/test/FAKE/945 (6).jpg",
+      "true_label": "FAKE",
+      "pred_prob": 0.002159508876502514
+    },
+    {
+      "image_path": "data/cifake/test/FAKE/767 (6).jpg",
+      "true_label": "FAKE",
+      "pred_prob": 0.006255919113755226
+    },
+    {
+      "image_path": "data/cifake/test/FAKE/342 (6).jpg",
+      "true_label": "FAKE",
+      "pred_prob": 0.02574576437473297
+    },
+    {
+      "image_path": "data/cifake/test/FAKE/273 (3).jpg",
+      "true_label": "FAKE",
+      "pred_prob": 0.02994529902935028
+    },
+    {
+      "image_path": "data/cifake/test/FAKE/183 (6).jpg",
+      "true_label": "FAKE",
+      "pred_prob": 0.05559217184782028
+    },
+    {
+      "image_path": "data/cifake/test/FAKE/239 (9).jpg",
+      "true_label": "FAKE",
+      "pred_prob": 0.07026966661214828
+    },
+    {
+      "image_path": "data/cifake/test/FAKE/344 (4).jpg",
+      "true_label": "FAKE",
+      "pred_prob": 0.07637523859739304
+    },
+    {
+      "image_path": "data/cifake/test/FAKE/172 (10).jpg",
+      "true_label": "FAKE",
+      "pred_prob": 0.12545734643936157
+    },
+    {
+      "image_path": "data/cifake/test/FAKE/494 (3).jpg",
+      "true_label": "FAKE",
+      "pred_prob": 0.13089779019355774
+    },
+    {
+      "image_path": "data/cifake/test/FAKE/373 (8).jpg",
+      "true_label": "FAKE",
+      "pred_prob": 0.23123091459274292
+    },
+    {
+      "image_path": "data/cifake/test/FAKE/254 (3).jpg",
+      "true_label": "FAKE",
+      "pred_prob": 0.24782972037792206
+    },
+    {
+      "image_path": "data/cifake/test/FAKE/170 (2).jpg",
+      "true_label": "FAKE",
+      "pred_prob": 0.40138348937034607
+    }
+  ]
+}

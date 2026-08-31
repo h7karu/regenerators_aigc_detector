@@ -8,7 +8,7 @@ __pycache__/
 env/
 venv/
 .venv/
-.uv-cache/
+.venv*/
 ENV/
 env.bak/
 venv.bak/
@@ -24,14 +24,19 @@ pip-log.txt
 
 # Pytest
 .pytest_cache/
+.test-tmp/
 
 # Jupyter Notebook
 .ipynb_checkpoints
-# Scratch notebooks stay local; notebooks/ is a submission deliverable and is tracked.
-/*.ipynb
+*.ipynb
+!notebooks/demo.ipynb
+!notebooks/results.ipynb
 
 # VSCode
 .vscode/
+
+# Claude Code local (personal) settings
+.claude/settings.local.json
 
 # IDEs
 .idea/
@@ -47,21 +52,28 @@ pip-log.txt
 /annotations/
 /labels/
 /models/
-/checkpoints/
+/checkpoints/*
+!/checkpoints/sid_local_lora/
+/checkpoints/sid_local_lora/*
 /weights/
 /outputs/
 /results/
 /predictions/
-/reports/
-*.joblib
+/predictions.json
+/reports/metrics/smoke_*.json
 
 # Large binary files
+*.exe
 *.h5
 *.pt
 *.pth
 *.ckpt
 *.tflite
 *.onnx
+
+# The deployed checkpoint is the sole versioned model artifact. It is tracked
+# through Git LFS; all training/smoke checkpoints remain ignored.
+!/checkpoints/sid_local_lora/sid_local_lora_best.pt
 
 # Logs and experiment tracking
 logs/
@@ -86,6 +98,9 @@ Thumbs.db
 .env
 .env.*
 secret_*/
+
+# Local artifact downloads and credentials
+artifacts/private/
 
 # OneDrive / Office temp
 ~$*

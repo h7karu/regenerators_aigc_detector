@@ -1,0 +1,135 @@
+{
+  "threshold": 0.9921313524246216,
+  "target_fpr": 0.05,
+  "n_false_positives": 10,
+  "n_false_negatives": 66,
+  "false_positives": [
+    {
+      "image_path": "data/wildfake_benchmark/eval/REAL/coco_val2017_00188.jpg",
+      "true_label": "REAL",
+      "pred_prob": 0.9999943971633911
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/REAL/coco_val2017_00174.jpg",
+      "true_label": "REAL",
+      "pred_prob": 0.9999873638153076
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/REAL/coco_val2017_00062.jpg",
+      "true_label": "REAL",
+      "pred_prob": 0.9999743700027466
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/REAL/coco_val2017_00114.jpg",
+      "true_label": "REAL",
+      "pred_prob": 0.9997660517692566
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/REAL/coco_val2017_00113.jpg",
+      "true_label": "REAL",
+      "pred_prob": 0.9995576739311218
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/REAL/coco_val2017_00017.jpg",
+      "true_label": "REAL",
+      "pred_prob": 0.9990712404251099
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/REAL/coco_val2017_00149.jpg",
+      "true_label": "REAL",
+      "pred_prob": 0.9989691972732544
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/REAL/coco_val2017_00189.jpg",
+      "true_label": "REAL",
+      "pred_prob": 0.998572826385498
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/REAL/coco_val2017_00039.jpg",
+      "true_label": "REAL",
+      "pred_prob": 0.9963864088058472
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/REAL/coco_val2017_00187.jpg",
+      "true_label": "REAL",
+      "pred_prob": 0.9930285811424255
+    }
+  ],
+  "false_negatives": [
+    {
+      "image_path": "data/wildfake_benchmark/eval/FAKE/dalle3_advanced_00080.jpg",
+      "true_label": "FAKE",
+      "pred_prob": 4.79416549861722e-12
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/FAKE/dalle3_advanced_00004.jpg",
+      "true_label": "FAKE",
+      "pred_prob": 9.14081518810228e-11
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/FAKE/dalle3_advanced_00180.jpg",
+      "true_label": "FAKE",
+      "pred_prob": 1.357820411662658e-09
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/FAKE/dalle3_advanced_00183.jpg",
+      "true_label": "FAKE",
+      "pred_prob": 3.908421586373834e-09
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/FAKE/dalle3_advanced_00192.jpg",
+      "true_label": "FAKE",
+      "pred_prob": 5.0852584365657094e-09
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/FAKE/dalle3_advanced_00086.jpg",
+      "true_label": "FAKE",
+      "pred_prob": 1.9569375453443172e-08
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/FAKE/dalle3_advanced_00070.jpg",
+      "true_label": "FAKE",
+      "pred_prob": 3.1197956218420586e-08
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/FAKE/dalle3_advanced_00056.jpg",
+      "true_label": "FAKE",
+      "pred_prob": 2.0113148480049858e-07
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/FAKE/dalle3_advanced_00063.jpg",
+      "true_label": "FAKE",
+      "pred_prob": 2.1375672076828778e-07
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/FAKE/dalle3_advanced_00087.jpg",
+      "true_label": "FAKE",
+      "pred_prob": 2.186914684898511e-07
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/FAKE/dalle3_advanced_00153.jpg",
+      "true_label": "FAKE",
+      "pred_prob": 2.6538015163168893e-07
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/FAKE/dalle3_advanced_00145.jpg",
+      "true_label": "FAKE",
+      "pred_prob": 6.830401275692566e-07
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/FAKE/dalle3_advanced_00103.jpg",
+      "true_label": "FAKE",
+      "pred_prob": 2.810285195664619e-06
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/FAKE/dalle3_advanced_00098.jpg",
+      "true_label": "FAKE",
+      "pred_prob": 4.7935031943779904e-06
+    },
+    {
+      "image_path": "data/wildfake_benchmark/eval/FAKE/dalle3_advanced_00060.jpg",
+      "true_label": "FAKE",
+      "pred_prob": 8.003647053556051e-06
+    }
+  ]
+}

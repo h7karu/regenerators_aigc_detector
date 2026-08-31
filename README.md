@@ -1,560 +1,572 @@
-# regenerators_aigc_detector
-This repository contains team regenerator's Artificial Intelligence Generated Content (AIGC) detector for TikTok TechJam 2026. You may click Run All to observe the complete pipeline: dataset inspection, robustness transforms, dual-branch training, clean-versus-transformed evaluation, branch ablation, inference outputs, and representative errors.
+# Regenerators AIGC Detector
 
-## Project overview
+Detecting AI-generated and AI-tampered images from pixels alone.
 
-The task is to tell AI-generated images from authentic ones, and to keep working
-after the image has been compressed, blurred, cropped, resized or filtered.
+Given an image, the detector returns a score for how likely it is to be
+AI-generated. It addresses two cases together: fully synthetic images, and real
+photographs whose contents have been locally edited or tampered. The trained
+model ships with a Gradio web interface, a directory-to-JSON CLI, and a
+reusable inference module.
 
-Our detector is **dual-branch**. Each branch sees something the other misses:
+The detector is research software. Its score is not a calibrated probability
+or proof of image provenance.
 
-```
-image ──┬──> frozen CLIP ViT-B/32 ─────> 512-d semantic embedding ──┐
-        │                                                            ├─> scale ─> head ─> P(AIGC)
-        └──> fixed forensic transforms ─> 143-d artifact vector ─────┘
-             (FFT radial spectrum, SRM
-              noise residuals, block DCT)
-```
+## Contents
 
-- **Semantic branch (CLIP).** A frozen, large-scale-pretrained vision encoder.
-  Its features are stable under exactly the degradations we are scored on, but
-  CLIP was trained to match images to captions, so it is tuned for *content* and
-  tends to smooth away the fine detail that betrays a generator.
-- **Forensic branch.** Fixed, untrained signal-processing descriptors that throw
-  away content and keep the artifact statistics: the radially-averaged FFT power
-  spectrum (exposes the periodic grid left by up-convolution layers), SRM-style
-  high-pass noise residuals borrowed from steganalysis, and block-DCT statistics.
+- [Approach](#approach)
+- [Final model results](#final-model-results)
+- [Run the trained model on another machine](#run-the-trained-model-on-another-machine)
+  — setup and installation
+- [Contributor setup](#contributor-setup)
+- [Repository layout](#repository-layout)
+- [Reproduce the reported results](#reproduce-the-reported-results)
+  — the end-to-end training and evaluation path
+- [Evaluate the frozen checkpoint](#evaluate-the-frozen-checkpoint)
+- [Limitations and future work](#limitations-and-future-work)
+- [Team member contributions](#team-member-contributions)
 
-They fail in different places, which is the point. Heavy blur and downscaling
-destroy the high frequencies the forensic branch depends on, while CLIP still
-recognises the image; conversely CLIP is weakest exactly where generator
-fingerprints are most obvious. Fusing them means a transform that defeats one
-branch usually leaves the other standing.
+## Approach
 
-Both branches are **frozen** — only a small scikit-learn head is trained. So the
-whole model is ~150M parameters (well under the 2B cap), trains in minutes on a
-laptop CPU, and needs no GPU.
+The model fuses two complementary views of the same image:
 
-**Robustness is trained in, not just measured.** Every source image contributes a
-clean view plus randomly degraded copies (JPEG, blur, resize, noise, colour
-jitter, crop, at random severity, stacked up to 2 deep). Training severities are
-sampled from continuous ranges wider than the evaluation grid, so the model
-learns to tolerate degradation in general rather than memorising the exact
-settings it will be tested on.
+- **RGB semantic branch** — a Swin-Tiny backbone
+  (`swin_tiny_patch4_window7_224`) adapted with LoRA on its attention
+  projections (`attn.qkv`, `attn.proj`). LoRA keeps the trained parameter count
+  small, which is what made a two-stage fine-tune affordable on a single
+  consumer GPU.
+- **Fourier-phase branch** — a compact CNN over six-channel sine/cosine maps of
+  the FFT phase spectrum. Generators leave periodic upsampling and resampling
+  traces in the frequency domain that are not apparent in RGB space and that
+  survive many local edits.
 
-### Repo layout
+Training ran in two stages: initialization on CIFAKE, then fine-tuning on a
+balanced 40,000-image SID-Set subset covering real, fully synthetic, and
+tampered images. Each training step pairs a clean view with a degraded view
+under a robustness loss, so the objective rewards agreement under JPEG, blur,
+resize, and noise rather than accuracy on pristine images alone. Checkpoints
+are selected by mean AUROC across a seven-condition validation policy, with
+worst-condition AUROC breaking ties.
 
-| Path | What it is |
-|---|---|
-| [aigc_detector/train.py](aigc_detector/train.py) | Train the detector |
-| [aigc_detector/infer.py](aigc_detector/infer.py) | Score an image directory → JSON |
-| [aigc_detector/evaluate.py](aigc_detector/evaluate.py) | Robustness table + error analysis |
-| [aigc_detector/models/dual_branch.py](aigc_detector/models/dual_branch.py) | The fusion model |
-| [aigc_detector/features/forensic.py](aigc_detector/features/forensic.py) | Frequency / noise-residual branch |
-| [aigc_detector/data/transforms.py](aigc_detector/data/transforms.py) | Robustness transforms + train-time augmentation |
-| [aigc_detector/data/](aigc_detector/data/) | Dataset loaders and subset downloaders |
-| [app.py](app.py) | Gradio browser UI for scoring one image |
-| [aigc_detector/ui.py](aigc_detector/ui.py) | Inference service behind the UI |
-| [scripts/](scripts/) | Dataset downloaders, plus UI setup/launch helpers |
+At inference, the default policy applies deterministic five-view test-time
+augmentation and combines the resulting logits with a trimmed mean.
 
-## Quickstart (first time pulling this repo)
+## Final model results
 
-`data/`, `models/`, and `demo_images/` are all gitignored — a fresh pull gives
-you code only. 
+| Split | Images | AUROC | Balanced accuracy | F1 |
+| --- | ---: | ---: | ---: | ---: |
+| SID model-selection (five-view TTA) | 2,000 | 0.9484 | 0.8825 | 0.8834 |
+| SID holdout (clean) | 2,000 | 0.9474 | 0.8680 | 0.8713 |
 
-If you already have `models/notebook_dual_branch.joblib` in `models/`, complete steps 1–2. Then choose what you want to do:
+These deployment results use deterministic five-view test-time augmentation
+(`clean`, `jpeg_70`, `blur_1.0`, `resize_0.5`, and `crop_0.8`) with a trimmed
+mean of model logits. Across the complete held-out degradation suite, mean
+AUROC is 0.9359 and the worst condition is `blur_2.0` at 0.9049 AUROC. See
+`reports/metrics/sid_local_lora_tta_test_robustness.json` for all conditions and
+`reports/metrics/inference_policy_validation.json` for policy selection.
 
-- **Use the browser UI:** skip steps 3–5 and follow
-  [Run the local Gradio interface](#run-the-local-gradio-interface).
-- **Score your own images:** skip steps 3–5 and follow
-  [Predict on a directory](#predict-on-a-directory-under-deliverable-552).
-- **Use the walkthrough notebook:** open it at step 5, but skip the training
-  cell under **“## 5. Train”**. You may run its later sample-image cells. Its
-  evaluation section needs test datasets, so download data if you want to run it.
-- **Evaluate the saved model:** download a test dataset, skip training, then
-  follow [Evaluate robustness](#evaluate-robustness).
+**[notebooks/results.ipynb](notebooks/results.ipynb)** walks through these
+results with rendered plots: cross-domain transfer (why SID adaptation was
+needed), robustness curves under JPEG/blur/resize/noise, per-generator accuracy
+(fully-synthetic vs. locally-tampered images), the test-time-augmentation gain,
+and the confident-error cases. It also carries a 200-image branch ablation from
+an earlier CLIP-plus-forensic design, retained as a record of that exploration
+rather than as a measurement of the deployed model.
 
-In every case above, `models/notebook_dual_branch.joblib` is the saved model that is loaded; you do not need to train it again.
+The notebook loads no checkpoint and runs no inference — it reads the JSON and
+CSV under `reports/` and finishes in seconds. Outputs are saved in the
+notebook, so it renders directly on GitHub without being executed. Figures
+whose inputs are absent from a given clone print a note and skip.
 
+Configuration: `configs/sid_local_lora.yaml`
 
-If you do not have `models/notebook_dual_branch.joblib` in `models/`, complete steps 1–5.
+Checkpoint: `checkpoints/sid_local_lora/sid_local_lora_best.pt`
 
-**Macs/Linux**:
+Training checkpoints and datasets are excluded from Git. The deployed SID
+checkpoint is tracked through Git LFS; see [ARTIFACTS.md](ARTIFACTS.md) for its
+path and checksum.
+
+## Run the trained model on another machine
+
+Training data is not required for inference.
+
+### 1. Install Git LFS and clone the complete repository
+
+Install [Git LFS](https://git-lfs.com/) before cloning. Then run:
+
 ```bash
-# 1. Virtual environment
-python3 -m venv venv
-source venv/bin/activate          # (venv) should now prefix your prompt
-
-# 2. Dependencies
-pip install -r requirements.txt
-
-# 3. Datasets — set up your Kaggle API token first (see step 3 below for details;
-#    no Kaggle account? skip download_cifake.sh, see "No Kaggle account?" below)
-chmod +x scripts/*.sh
-./scripts/download_cifake.sh
-./scripts/download_sid_set.sh
-./scripts/download_wildfake.sh
-
-# 4. Train a model only when you do not already have a saved checkpoint (.joblib)
-python -m aigc_detector.train \
-    --data-dir data/cifake/train \
-    --data-dir data/wildfake/train \
-    --data-dir data/sid_set/train \
-    --max-per-class 150 --augment-copies 2 \
-    --output models/notebook_dual_branch.joblib
-
-# 5. Run directory inference on held-out WildFake test images.
-# This writes one JSON record per image: {"image_path": "...", "pred": ...}.
-python -m aigc_detector.infer \
-    --input-dir data/wildfake/test/REAL \
-    --checkpoint models/notebook_dual_branch.joblib \
-    --output reports/wildfake_real_predictions.json
-# You may repeat this for different image directories after the --input-dir (eg.  data/wildfake/test/FAKE)
-
-# View the JSON output for the input images.
-cat reports/wildfake_real_predictions.json
-
-# Optional: score held-out AIGC images as well.
-python -m aigc_detector.infer \
-    --input-dir data/wildfake/test/FAKE \
-    --checkpoint models/notebook_dual_branch.joblib \
-    --output reports/wildfake_fake_predictions.json
-
-# Optional: Open the end-to-end walkthrough notebook.
-jupyter notebook notebooks/aigc_detector_walkthrough.ipynb
-# In the notebook UI, click "Run All" to run all cells from top to bottom.
+git lfs install
+git clone https://github.com/h7karu/regenerators_aigc_detector.git
+cd regenerators_aigc_detector
+git lfs pull --include="checkpoints/sid_local_lora/sid_local_lora_best.pt"
 ```
 
-**Windows**:
+The resulting deployment folders must look like this:
+
+```text
+regenerators_aigc_detector/
+├── checkpoints/
+│   └── sid_local_lora/
+│       └── sid_local_lora_best.pt
+├── configs/
+│   └── sid_local_lora.yaml
+├── deployment.py
+├── demo.py
+└── requirements.txt
+```
+
+On Windows PowerShell, the same Git commands apply. Confirm the model exists:
+
 ```powershell
-# 1. Virtual environment
-python -m venv venv
-.\venv\Scripts\Activate.ps1       # (venv) should now prefix your prompt
-
-# If PowerShell says scripts are disabled, run this once for the current terminal only, then repeat the activation command above:
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-
-# 2. Dependencies
-pip install -r requirements.txt
-
-# 3. Datasets — set up your Kaggle API token first (see step 3 below for details;
-#    no Kaggle account? skip the kaggle.exe line below)
-.\venv\Scripts\kaggle.exe datasets download `
-  birdy654/cifake-real-and-ai-generated-synthetic-images `
-  -p data/cifake --unzip
-.\venv\Scripts\python.exe -m aigc_detector.data.download_sid_set
-.\venv\Scripts\python.exe -m aigc_detector.data.download_wildfake
-
-# If you see cannot execute: required file not found on WSL, the script may have Windows (CRLF) line endings. 
-# Run the commands below before trying again.
-sed -i 's/\r$//' scripts/download_cifake.sh
-sed -i 's/\r$//' scripts/download_sid_set.sh
-sed -i 's/\r$//' scripts/download_wildfake.sh
-
-# 4. Train a model only when you do not already have a saved checkpoint (.joblib)
-.\venv\Scripts\python.exe -m aigc_detector.train `
-    --data-dir data/cifake/train `
-    --data-dir data/wildfake/train `
-    --data-dir data/sid_set/train `
-    --max-per-class 150 --augment-copies 2 `
-    --output models/notebook_dual_branch.joblib
-
-# 5. Run directory inference on held-out WildFake test images.
-# This writes one JSON record per image: {"image_path": "...", "pred": ...}.
-python -m aigc_detector.infer `
-    --input-dir data\wildfake\test\REAL `
-    --checkpoint models\notebook_dual_branch.joblib `
-    --output reports\wildfake_real_predictions.json
-
-# You may repeat this for different image directories after the --input-dir (eg.  data/wildfake/test/FAKE)
-
-# View the JSON output of the input images.
-Get-Content .\reports\wildfake_real_predictions.json
-
-# Optional: score held-out AIGC images as well.
-python -m aigc_detector.infer `
-    --input-dir data\wildfake\test\FAKE `
-    --checkpoint models\notebook_dual_branch.joblib `
-    --output reports\wildfake_fake_predictions.json
-
-# Optional: Open the end-to-end walkthrough notebook.
-jupyter notebook notebooks\aigc_detector_walkthrough.ipynb
-# In the notebook UI, click "Run All" to run all cells from top to bottom.
+Test-Path checkpoints\sid_local_lora\sid_local_lora_best.pt
 ```
 
-That's the whole path from a clean pull to a working notebook. Details on each
-step (dataset sizes, flags, what gets written where) are below.
+Install Python 3.12.14, the project's documented target.
 
-## Setup and installation instructions
+### 2. Create and activate an environment
 
-### 1. Get the repo and the virtual environment
-
-```
-git pull origin main
-```
-
-Set up the virtual environment. On WSL/Ubuntu you may first need
-`sudo apt install python3-venv`:
-
-```
-python3 -m venv venv
-source venv/bin/activate
-```
-
-Your prompt should now be prefixed with `(venv)`, which means you are inside the
-virtual environment.
-
-### 2. Install the packages
-
-```
-pip install -r requirements.txt
-```
-
-`requirements.txt` gets updated when new packages are needed — just run this
-again after a `git pull`.
-
-### 3. Download the datasets
-
-Everything under `data/` is gitignored, so **the datasets are never pushed to
-GitHub** — each person downloads them locally with these scripts. Run them from
-the repo root.
-
-The two large datasets are only ever fetched as **small subsets**. SID_Set is
-~140 GB and WildFake is ~1.3 TB in full, so the scripts never download everything
-: they use HTTP range requests to pull just the individual images they need
-(a few hundred MB for SID_Set, a few MB for WildFake).
-
-**CIFAKE needs a Kaggle API token; the other two need nothing.** SID_Set and
-WildFake are fetched over anonymous HTTP range requests, so they work straight
-from a clean pull. For CIFAKE, authenticate as yourself — no credential is
-shipped with this repo:
-
-1. Sign in at [kaggle.com](https://www.kaggle.com), then go to your profile →
-   **Settings** → **API** → **Create New Token**. This downloads `kaggle.json`.
-2. Put it where the Kaggle CLI looks for it, and lock down the permissions:
+Linux or macOS:
 
 ```bash
-mkdir -p ~/.kaggle && mv ~/Downloads/kaggle.json ~/.kaggle/
-chmod 600 ~/.kaggle/kaggle.json
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
 ```
 
-Verify it works with `kaggle datasets list -s cifake`. (A `.env` file in the
-repo root does **not** work — nothing in this project or in the Kaggle CLI reads
-one. If you would rather not write the file, export `KAGGLE_USERNAME` and
-`KAGGLE_KEY` in your shell instead; the CLI picks those up too.)
+Windows PowerShell:
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+```
+
+### 3. Install PyTorch for the machine
+
+For CPU-only inference on Windows PowerShell, use this as one line (PowerShell
+does not use `\` for line continuation):
+
+```powershell
+python -m pip install torch==2.13.0+cpu torchvision==0.28.0+cpu --index-url https://download.pytorch.org/whl/cpu
+```
+
+For CPU-only inference on Linux:
 
 ```bash
-# CIFAKE — the full dataset (~100k images), via the Kaggle API
-chmod +x scripts/*.sh
-./scripts/download_cifake.sh
-
-# SID_Set subset (default 150 images per class)
-./scripts/download_sid_set.sh
-./scripts/download_sid_set.sh --per-class 300     # or ask for more
-
-# WildFake subset (default 300 images per class, spread across generator families)
-./scripts/download_wildfake.sh
-./scripts/download_wildfake.sh --per-class 500
-
-# The organisers' reserved demo benchmark — EVALUATION ONLY, never train on this
-./scripts/download_wildfake_benchmark.sh
-```
-If you see `cannot execute: required file not found` on WSL, the script may have Windows (CRLF) line endings. 
-Run the command below before trying again.
-
-```
-sed -i 's/\r$//' scripts/download_cifake.sh
+python -m pip install torch==2.13.0+cpu torchvision==0.28.0+cpu \
+  --index-url https://download.pytorch.org/whl/cpu
 ```
 
-#### No Kaggle account? Skip CIFAKE
-
-CIFAKE is the only dataset behind a credential. If you would rather not create a
-Kaggle token, skip step 3 and `download_cifake.sh` entirely — the pipeline runs
-end to end on the other two, which need no credentials at all:
+For CPU inference on macOS:
 
 ```bash
-./scripts/download_sid_set.sh
-./scripts/download_wildfake.sh
-
-python -m aigc_detector.train \
-    --data-dir data/wildfake/train \
-    --data-dir data/sid_set/train \
-    --max-per-class 150 --augment-copies 2 \
-    --output models/notebook_dual_branch.joblib
+python -m pip install torch==2.13.0 torchvision==0.28.0
 ```
 
-`--data-dir` is repeatable and every dataset lands in the same layout, so
-dropping one is just dropping its line.
+For NVIDIA inference, do not use the CPU command above. Install the matching
+CUDA build using the command from the
+[PyTorch installation selector](https://pytorch.org/get-started/locally/), then
+verify it:
 
-The notebook needs **one** edit: in the evaluation cell, change
-
-```python
-EVAL_DATASET = "cifake"   ->   EVAL_DATASET = "wildfake"
+```bash
+python -c "import torch; print('PyTorch:', torch.__version__); print('CUDA build:', torch.version.cuda); print('CUDA available:', torch.cuda.is_available()); print('Device:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU')"
 ```
 
-That variable is set once and reused by the evaluation, ablation, and error-
-analysis cells, so the single change carries through all of them. Everything
-else adapts on its own — the inventory and training cells already skip datasets
-that are not present, and `evaluate.py` / `infer.py` take explicit paths.
+`CUDA available` should be `True` and `Device` should show the GPU name. If it
+prints `False`, confirm that the NVIDIA driver works and that the selector
+command installed a CUDA build rather than the CPU build.
 
-You are training on less data, so expect somewhat weaker numbers than the
-reported ones; raise `--per-class` on the two download scripts to close some of
-that gap.
+On every platform, confirm that both packages import and that their versions
+match:
 
-Each script writes the same folder layout, so everything downstream treats them
-identically:
-
+```bash
+python -c "import torch, torchvision; print(torch.__version__, torchvision.__version__)"
 ```
-data/<dataset>/
+
+For the pinned CPU build this prints versions beginning with `2.13.0+cpu` and
+`0.28.0+cpu`.
+
+If Windows reports `No matching distribution found`, confirm that the active
+interpreter is the documented 64-bit Python 3.12 environment:
+
+```powershell
+python -c "import platform, sys; print(sys.executable); print(sys.version); print(platform.architecture()[0])"
+```
+
+It should point inside `.venv`, report Python 3.12.14, and print `64bit`. Do not
+run the Linux command containing `\` in PowerShell.
+
+### 4. Install project dependencies
+
+```bash
+python -m pip install -r requirements.txt
+python -m pip check
+```
+
+There is intentionally one requirements file. PyTorch remains separate because
+its CPU and CUDA wheels are platform-specific.
+
+### 5. Verify the Git LFS checkpoint
+
+The deployed `sid_local_lora_best.pt` checkpoint is versioned at the following
+path through Git LFS rather than ordinary Git:
+
+```text
+checkpoints/sid_local_lora/sid_local_lora_best.pt
+```
+
+If the clone did not download the binary automatically, run these commands from
+the repository root:
+
+```bash
+git lfs install
+git lfs pull --include="checkpoints/sid_local_lora/sid_local_lora_best.pt"
+```
+
+Confirm that the downloaded file is approximately 143 MB. If it is only a
+small text file beginning with `version https://git-lfs.github.com/spec/v1`, the
+LFS object has not been downloaded yet; rerun `git lfs pull`.
+
+Verify it on Linux or macOS:
+
+```bash
+sha256sum checkpoints/sid_local_lora/sid_local_lora_best.pt
+```
+
+Or on Windows PowerShell:
+
+```powershell
+Get-FileHash -Algorithm SHA256 `
+  checkpoints\sid_local_lora\sid_local_lora_best.pt
+```
+
+Expected SHA256:
+
+```text
+f71653e7321068a193685abfc43fb3accb6f05314335a15b62215fd7e135af43
+```
+
+### 6. Start the web interface
+
+The launcher defaults point to the final checkpoint and config:
+
+```bash
+python demo.py --device auto --host 127.0.0.1 --port 7860
+```
+
+Open <http://127.0.0.1:7860>. Use `--device cpu` or `--device cuda` to require a
+specific device. For a remote machine, forward the port instead of exposing the
+development server publicly:
+
+```bash
+ssh -L 7860:127.0.0.1:7860 user@server
+```
+
+The Gradio **Analyse image** action calls the canonical SID checkpoint through
+the same five-view trimmed-mean TTA policy used by `predict.py` and
+`evaluate.py`. Gradio also exposes this action as the `/analyse` API endpoint;
+the robustness lab is available as `/robustness`.
+
+### 7. Optional: run directory inference
+
+```bash
+python predict.py \
+  --input-dir path/to/images \
+  --output predictions.json
+```
+
+The prediction CLI shares the same SID checkpoint and configuration defaults as
+the web interface, including five-view TTA and its validation-selected 0.4856
+decision threshold. Pass `--single-view` to benchmark the raw checkpoint.
+
+## Contributor setup
+
+The setup scripts create a Python 3.12.14 CPU environment, install the single
+requirements file, and verify it.
+
+Linux:
+
+```bash
+bash scripts/setup_linux.sh
+source .venv/bin/activate
+```
+
+Windows PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\setup_windows.ps1
+.\.venv\Scripts\Activate.ps1
+```
+
+Run tests with:
+
+```bash
+python -m pytest -q
+```
+
+## Repository layout
+
+```text
+configs/                Training and inference configurations
+notebooks/              Hosted demo notebook and a rendered results walkthrough
+scripts/                Setup, data preparation, and GPU helpers
+tests/                  Automated tests
+ARTIFACTS.md            External artifact locations and checksums
+COLAB_TRAINING.md        Multi-source GPU training runbook
+requirements.txt        All direct project dependencies except PyTorch
+train.py                Training and checkpoint selection
+evaluate.py             Clean and robustness evaluation
+predict.py              Directory-to-JSON inference
+demo.py                 Gradio frontend launcher
+demo_app.py             Frontend components and event handling
+demo_inference.py       Reusable inference service
+deployment.py           Canonical deployed checkpoint and config defaults
+inference_policy.py      TTA and calibrated ensemble aggregation
+model.py                Swin, LoRA, phase encoder, and fusion model
+data_pipeline.py        Manifest and streaming datasets, plus sampling
+augmentations.py        Training and benchmark transformations
+metrics.py              AUROC, AP, F1, and related metrics
+```
+
+Generated `data/`, `logs/`, `models/`, and training-checkpoint files are ignored
+by Git. The deployed SID checkpoint is the sole LFS-managed checkpoint
+exception. Selected reproducible metric reports under `reports/metrics/` are
+versioned with the source.
+
+## Reproduce the reported results
+
+The numbers in [Final model results](#final-model-results) come from the
+end-to-end path below. Steps 2 and 4 need an NVIDIA GPU; the evaluation in step
+5 runs on CPU. The stage-2 SID fine-tune dominates the wall-clock cost.
+
+| # | Step | Where | Produces |
+| --- | --- | --- | --- |
+| 1 | Build CIFAKE manifests | [Prepare CIFAKE for training](#prepare-cifake-for-training) | `data/manifests/cifake_*.csv` |
+| 2 | Stage-1 CIFAKE training | [Train or resume the final configuration](#train-or-resume-the-final-configuration) | `checkpoints/full_cifake_lora/full_cifake_lora_best.pt` |
+| 3 | Build the balanced SID subset and splits | [Faster local SID training](#faster-local-sid-training) | `data/manifests/sid_*.csv` |
+| 4 | Stage-2 SID fine-tune | [Faster local SID training](#faster-local-sid-training) | `checkpoints/sid_local_lora/sid_local_lora_best.pt` |
+| 5 | Robustness evaluation | [Evaluate the frozen checkpoint](#evaluate-the-frozen-checkpoint) | `reports/metrics/sid_local_lora_tta_test_robustness.json` |
+
+Step 3 has an alternative: `configs/sid_streaming_lora.yaml` streams SID-Set
+from Hugging Face without persisting images. See
+[Stream SID-Set without storing images](#stream-sid-set-without-storing-images).
+
+Each reported value traces to a committed artifact:
+
+| Reported value | Artifact |
+| --- | --- |
+| Model-selection TTA row (0.9484 AUROC) and the 0.4856 threshold | `reports/metrics/inference_policy_validation.json` |
+| Holdout clean row (0.9474 AUROC), the 0.9359 mean, and `blur_2.0` at 0.9049 | `reports/metrics/sid_local_lora_tta_test_robustness.json` |
+| Single-view holdout comparison (0.9427 AUROC, no TTA) | `reports/metrics/sid_local_lora_test_robustness.json` |
+| Pre-fine-tune transfer baselines | `reports/metrics/pre_sid_cifake_robustness.json`, `reports/metrics/pre_sid_sid_holdout_robustness.json` |
+
+To read the results without retraining anything, open
+[notebooks/results.ipynb](notebooks/results.ipynb), which uses these files
+directly.
+
+Seeds and split construction are deterministic, but exact floating-point values
+can still shift across a different GPU, driver, or PyTorch build.
+
+## Prepare CIFAKE for training
+
+Download and extract CIFAKE into:
+
+```text
+cifake-real-and-ai-generated-synthetic-images/
 ├── train/
-│   ├── REAL/
-│   └── FAKE/
+│   ├── FAKE/
+│   └── REAL/
 └── test/
-    ├── REAL/
-    └── FAKE/
+    ├── FAKE/
+    └── REAL/
 ```
 
-Start small. Every script takes `--per-class`, and the defaults are deliberately
-modest so a laptop does not fill up. Check what you have at any time with
-`du -sh data/*`.
-
-> **Reserved benchmark.** `download_wildfake_benchmark.sh` fetches COCO val2017
-> (non-AIGC) and DALL·E 3 "Advanced" (AIGC), which the organisers set aside to
-> demo performance. It does not count toward the final score and **must not be
-> trained on**. It lands in `data/wildfake_benchmark/eval/` — an `eval/` split,
-> not `train/`, so a training run cannot pick it up by accident. The training
-> downloaders exclude those same images at the source.
-
-## Steps to reproduce the results
-
-### Run the local Gradio interface
-
-A browser UI for scoring one image at a time — upload, webcam, or paste. It needs
-two things: the virtual environment from step 1–2 of the Quickstart, and a trained
-checkpoint at `models/notebook_dual_branch.joblib`.
-
-If you already followed the Quickstart, you have both, and you can skip straight
-to **Launch** below.
-
-#### Set up
-
-Creates `venv/` if it is missing and installs everything the UI needs. Safe to
-re-run.
-
-**Mac/Linux**:
-```bash
-chmod +x run_ui.sh scripts/*.sh
-./scripts/setup_ui.sh
-./scripts/setup_ui.sh --train      # also train the checkpoint if it is missing
-```
-
-**Windows**:
-```powershell
-.\setup_ui.cmd
-.\setup_ui.cmd -TrainModel         # also train the checkpoint if it is missing
-```
-
-On Windows, setup uses [uv](https://docs.astral.sh/uv/) when it is installed —
-it is faster and installs the exact pinned set from `requirements.lock`. If uv is
-not present the script falls back to stock `venv` + `pip`, so it is not required.
-
-#### Train the demo checkpoint
-
-Only needed if `models/notebook_dual_branch.joblib` does not exist yet. This
-reproduces it from CIFAKE with a fixed seed, so both platforms produce the same
-model:
-
-**Mac/Linux**:
-```bash
-./scripts/train_demo_model.sh
-```
-
-**Windows**:
-```powershell
-.\train_demo_model.cmd
-```
-
-No Kaggle token? CIFAKE is the one dataset behind a credential — train on the
-credential-free datasets instead (see "No Kaggle account?" above) and write the
-result to the same path:
+Then build deterministic manifests:
 
 ```bash
-python -m aigc_detector.train \
-    --data-dir data/sid_set/train \
-    --data-dir data/wildfake/train \
-    --max-per-class 150 --augment-copies 2 \
-    --output models/notebook_dual_branch.joblib
+bash scripts/download_cifake.sh
+python scripts/build_manifest.py
 ```
 
-#### Verify
+Do not use the held-out test split for checkpoint or threshold selection.
 
-Confirms Gradio is installed and the checkpoint loads with both branches:
+## Train or resume the final configuration
 
-**Mac/Linux**:
-```bash
-./venv/bin/python scripts/verify_ui.py
-```
-
-**Windows**:
-```powershell
-.\venv\Scripts\python.exe scripts\verify_ui.py
-```
-
-#### Launch
-
-**Mac/Linux**:
-```bash
-./run_ui.sh
-# or, with the venv already activated:
-python app.py
-```
-
-**Windows**:
-```powershell
-.\run_ui.cmd
-# or, without activating the virtual environment:
-.\venv\Scripts\python.exe app.py
-```
-
-The app opens at `http://127.0.0.1:7860`. If that port is busy, Gradio picks
-another and prints the address.
-
-| Environment variable | What it does |
-|---|---|
-| `AIGC_CHECKPOINT` | Load a different checkpoint instead of the default path. |
-| `AIGC_OFFLINE=1` | Skip Hugging Face network checks on startup. Only set this once CLIP is cached locally — on a first run it prevents the download. |
-
-> **On reading the output.** The verdict is whichever class scores higher, and the
-> model is often extremely confident when it is wrong — a real photograph can come
-> back as AI-GENERATED at 100%. Treat it as a ranking signal, not proof, and
-> pre-select your images before demoing.
-
-### Train
+Check readiness:
 
 ```bash
-# Quick baseline on CIFAKE
-python -m aigc_detector.train --data-dir data/cifake/train --max-per-class 2000
-
-# Mix datasets — this is what generalises across generator families
-python -m aigc_detector.train \
-    --data-dir data/cifake/train \
-    --data-dir data/wildfake/train \
-    --data-dir data/sid_set/train \
-    --max-per-class 1000 \
-    --output models/dual_branch.joblib
+python scripts/check_training_readiness.py \
+  --config configs/full_cifake_lora.yaml --require-cuda
 ```
 
-Useful flags:
-
-| Flag | Default | Why you'd change it |
-|---|---|---|
-| `--max-per-class N` | all | Cap source images per class. Start small. |
-| `--augment-copies N` | `2` | Degraded copies per image. `0` disables augmentation. |
-| `--branches` | `clip forensic` | Use one branch alone for ablations. |
-| `--head` | `logreg` | `mlp` for a non-linear fusion head. |
-
-Training cost scales as `images × (1 + augment-copies)`, so `--max-per-class
-1000 --augment-copies 2` means 6000 feature extractions.
-
-### Predict on a directory (under deliverable 5.5.2)
+Start training:
 
 ```bash
-python -m aigc_detector.infer \
-    --input-dir path/to/images \
-    --checkpoint models/dual_branch.joblib \
-    --output predictions.json
+python train.py --config configs/full_cifake_lora.yaml --device cuda
 ```
 
-Writes the format as stated in 5.5.2 for — `pred` is the confidence the image is
-AI-generated:
-
-```json
-[
-  {"image_path": "path/to/images/a.jpg", "pred": 0.9412},
-  {"image_path": "path/to/images/b.jpg", "pred": 0.0317}
-]
-```
-
-### Evaluate robustness
+Resume an interrupted run:
 
 ```bash
-# Held-out CIFAKE test split
-python -m aigc_detector.evaluate \
-    --data-dir data/cifake/test \
-    --checkpoint models/dual_branch.joblib
-
-# The organisers' reserved benchmark
-python -m aigc_detector.evaluate \
-    --data-dir data/wildfake_benchmark/eval \
-    --checkpoint models/dual_branch.joblib \
-    --output-dir reports/benchmark
+python train.py \
+  --config configs/full_cifake_lora.yaml \
+  --device cuda \
+  --resume checkpoints/full_cifake_lora/last.pt
 ```
 
-This scores the test set clean and under every transform in the brief's table,
-and writes to `reports/`:
+The run saves `last.pt` after every epoch. Configurations without an explicit
+validation transform list select the best checkpoint by clean validation AUROC.
+A checkpoint that completed every configured epoch is rejected by the resume
+guard. For SID-Set, WildFake, multi-source preparation, and Colab, see
+[COLAB_TRAINING.md](COLAB_TRAINING.md).
 
-- `robustness_summary.csv` / `.md` — accuracy, precision, recall, F1 and AUROC
-  per transform, plus the drop against clean.
-- `error_analysis.json` — the most confident false positives and false negatives.
+### Stream SID-Set without storing images
 
-**On the operating threshold.** Accuracy at a 0.5 cutoff is a weak summary for a
-moderation system: wrongly flagging a real user's photo is the more expensive
-mistake, so the two error types should not be traded one-for-one. The evaluator
-therefore also picks the threshold that holds the false-positive rate at or below
-`--target-fpr` (default 5%) on clean data, and reports every transform at that
-same fixed threshold. `recall@fixed_thr` is the number to watch: it says how much
-AIGC we still catch at a false-positive rate a platform could actually live with.
+`configs/sid_streaming_lora.yaml` streams SID-Set directly from Hugging Face,
+drops localization masks before decoding, and emits 50% real, 25% fully
+synthetic, and 25% tampered examples. It validates on 2,000 fixed samples under
+clean, JPEG, blur, resize, noise, colour, and crop conditions. The mean
+per-condition AUROC selects the checkpoint; worst-condition AUROC breaks ties,
+and one threshold is fitted to the pooled validation predictions.
 
-### Reproduce the ablation
-
-The fusion should be justified, not assumed — train each branch alone and compare:
+Initialize it from the CIFAKE model:
 
 ```bash
-for B in "clip" "forensic" "clip forensic"; do
-  python -m aigc_detector.train --branches $B --max-per-class 1000 \
-      --output "models/ablation_${B// /_}.joblib"
-  python -m aigc_detector.evaluate --checkpoint "models/ablation_${B// /_}.joblib" \
-      --output-dir "reports/ablation_${B// /_}"
-done
+python train.py \
+  --config configs/sid_streaming_lora.yaml \
+  --device cuda \
+  --init-checkpoint checkpoints/full_cifake_lora/full_cifake_lora_best.pt
 ```
 
-## Limitations
+No SID images are persisted, but each epoch still consumes substantial network
+bandwidth. Paired clean/degraded training doubles the forward-pass image count,
+so the full configuration uses a source-image batch size of 128 on a measured
+24 GiB RTX 3090. Resume an interrupted run with:
 
-- **CIFAKE is 32×32.** CLIP expects 224×224, so CIFAKE images are upscaled ~7×
-  before the encoder sees them, and there is little genuine high-frequency detail
-  for the forensic branch to read. CIFAKE is therefore a fast iteration loop, not
-  a realistic proxy for social-media imagery — trust the SID_Set and WildFake
-  numbers more.
-- **Dataset shortcuts.** In both SID_Set and WildFake the two classes arrive in
-  systematically different containers (real images as JPEGs at assorted sizes,
-  synthetic ones as 1024×1024 PNGs). A model can score near-perfectly by keying
-  on "PNG and square" while learning nothing about generation — and that shortcut
-  vanishes the moment it meets a real PNG. The downloaders re-encode every image
-  through the same encoder at the same size cap to remove it (`--no-normalize`
-  keeps the original bytes if you want to measure the difference). One residual
-  cue survives: the synthetic images are square and many real ones are not, which
-  we do not correct because cropping would destroy more signal than it removes.
-- **Frozen backbone.** Only the head is trained, so accuracy is capped by what is
-  linearly separable in the fused feature space. Fine-tuning the last few CLIP
-  blocks is the obvious next step, and still fits the parameter budget.
-- **Generator coverage.** The subsets cover a handful of generator families. The
-  reserved benchmark is DALL·E 3, which nothing in training has seen — that gap
-  is the honest test of generalisation, and we expect it to be the weakest
-  number.
-- **The forensic branch has a known blind spot.** It reads a fixed 256×256
-  grayscale resize, so aggressive downscaling (0.25×) or heavy blur removes the
-  evidence it depends on. This is visible in the robustness table and is exactly
-  why the fusion exists.
+```bash
+python train.py \
+  --config configs/sid_streaming_lora.yaml \
+  --device cuda \
+  --resume checkpoints/sid_streaming_lora/last.pt
+```
 
-### What we'd do with more time
+### Faster local SID training
 
-1. Fine-tune the last CLIP blocks instead of freezing everything.
-2. Train on many more generator families and measure leave-one-generator-out
-   generalisation, which is the metric that predicts real deployment.
-3. Add a calibration step (temperature scaling / reliability diagrams) so `pred`
-   can be read as a probability rather than just ranked.
-4. Patch-level scoring with aggregation, so high-resolution images are not
-   bottlenecked through a single 224×224 resize.
+SID-Set is approximately 130 GiB in its entirety. On slower Hugging Face
+connections, repeatedly streaming remote Parquet shards leaves the GPU idle.
+The recommended fast path is to authenticate with the Hugging Face CLI and
+materialise a balanced bounded subset once. The builder discards localization
+masks before decoding samples:
 
-## Contribution
-Team member contributions (if applicable, i.e. team participants, non-solo participants)
+```bash
+hf auth login
+
+python scripts/build_sid_subset.py \
+  --split train \
+  --real-count 20000 \
+  --synthetic-count 10000 \
+  --tampered-count 10000
+
+python scripts/build_sid_subset.py \
+  --split validation \
+  --real-count 2000 \
+  --synthetic-count 1000 \
+  --tampered-count 1000
+
+python scripts/split_sid_validation.py
+```
+
+The final command creates a stratified 2,000-image model-selection split and a
+separate 2,000-image holdout. Then train with the local, four-worker
+configuration:
+
+```bash
+python scripts/check_training_readiness.py \
+  --config configs/sid_local_lora.yaml \
+  --require-cuda
+
+python train.py \
+  --config configs/sid_local_lora.yaml \
+  --device cuda \
+  --init-checkpoint checkpoints/full_cifake_lora/full_cifake_lora_best.pt
+```
+
+The local configuration enables persistent workers, four-batch prefetching,
+cuDNN autotuning, TF32 for eligible float32 kernels, fused AdamW, AMP, and a
+source batch size of 128. It retains the same paired-view robustness loss and
+seven-condition validation policy as the streaming configuration.
+
+## Evaluate the frozen checkpoint
+
+```bash
+python evaluate.py \
+  --split test \
+  --all-transforms \
+  --output reports/metrics/sid_local_lora_tta_test_robustness.json
+```
+
+The evaluator shares the deployed SID defaults and TTA policy. Use
+`--transform clean` instead of `--all-transforms` for a quick clean-only
+evaluation, or `--single-view` to measure the checkpoint without TTA.
+
+## Limitations and future work
+
+### Limitations
+
+- SID and CIFAKE cover a limited generator and manipulation distribution. Both
+  stages saw a fixed set of generators, so nothing here demonstrates transfer
+  to architectures released after that data was collected.
+- Generalisation to arbitrary generators, edits, screenshots, and social-media
+  processing has not been established.
+- The validation-selected threshold may need recalibration for other data. The
+  output is a decision score, not a calibrated probability.
+- `blur_2.0` is the weakest condition at 0.9049 AUROC, and `resize_0.25` is
+  second at 0.9181. Both destroy the high-frequency evidence the phase branch
+  depends on, which is a structural weakness of the design rather than a
+  tuning problem.
+- On the SID holdout, 15.8% of real images are still flagged at the deployed
+  threshold (89.4% of AI images are caught). Wherever a false accusation is
+  costly, that false-positive rate is the binding constraint, not AUROC.
+- Pixel-only detection is supporting evidence, not definitive provenance. The
+  model cannot see C2PA signatures, EXIF, or distribution context.
+
+### What we would improve with more time
+
+- **Wider generator coverage.** Train and evaluate across additional sources —
+  WildFake, and diffusion families absent from SID — to measure the
+  cross-generator gap directly instead of assuming it.
+  `scripts/build_wildfake_manifest.py` and
+  `configs/multisource_phase_robust.yaml` are the groundwork already in place.
+- **Calibration.** Fit temperature scaling or isotonic regression on a held-out
+  split so the score reads as a probability, and report expected calibration
+  error next to AUROC.
+- **Localization.** SID-Set ships tampering masks that the current pipeline
+  discards before decoding. Predicting *where* an image was edited would be far
+  more actionable than a single image-level score, and the masks to supervise
+  it are already there.
+- **Ablate the deployed architecture.** The ablation artifacts in the results
+  notebook probe an earlier CLIP-plus-forensic design at 200 images. An
+  RGB-only / phase-only / fused comparison on the deployed model at the full
+  2,000-image evaluation size would establish what the phase branch actually
+  contributes.
+- **Blur and downscale robustness.** Add scale-aware augmentation and
+  multi-resolution inference to recover the loss at `blur_2.0` and
+  `resize_0.25`.
+- **Inference cost.** Five-view TTA multiplies cost by five for a modest gain
+  (0.9427 to 0.9474 AUROC on the holdout). Distilling the TTA ensemble into a
+  single forward pass would make deployment substantially cheaper.
+
+## Team member contributions
+
+| Member | Contribution |
+| --- | --- |
+| Zechary Chua | _TBD_ |
+| Isaac Teo | _TBD_ |
+| Wei Tianyue | _TBD_ |
+| Tan Jie En, Nigel | _TBD_ |
+| Kawaguchi Hikaru | _TBD_ |
+
+## Contributing
+
+Keep generated data and training checkpoints out of Git. The canonical deployed
+SID checkpoint is the only Git-LFS-managed exception. Add tests for behavioural
+changes and run `python -m pytest -q` before opening a pull request.

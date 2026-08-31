@@ -1,0 +1,28 @@
+{
+  "split": "test",
+  "checkpoint": "checkpoints/full_cifake_lora/full_cifake_lora_best.pt",
+  "threshold": 0.8002490401268005,
+  "transforms": {
+    "clean": {
+      "threshold": 0.8002490401268005,
+      "samples": 20000,
+      "balanced_accuracy": 0.9742500000000001,
+      "f1": 0.9743997613958344,
+      "precision": 0.9687654443016704,
+      "recall": 0.9801,
+      "false_positive_rate": 0.0316,
+      "confusion_matrix": [
+        [
+          9684,
+          316
+        ],
+        [
+          199,
+          9801
+        ]
+      ],
+      "auroc": 0.9969958099999999,
+      "average_precision": 0.996950598164498
+    }
+  }
+}
