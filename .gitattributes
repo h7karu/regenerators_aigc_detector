@@ -9,3 +9,6 @@
 *.lock text eol=lf
 *.ipynb text eol=lf
 *.ps1 text eol=crlf
+
+# The production checkpoint exceeds normal Git hosting limits.
+checkpoints/sid_local_lora/sid_local_lora_best.pt filter=lfs diff=lfs merge=lfs -text

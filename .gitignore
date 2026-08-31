@@ -48,7 +48,9 @@ pip-log.txt
 /annotations/
 /labels/
 /models/
-/checkpoints/
+/checkpoints/*
+!/checkpoints/sid_local_lora/
+/checkpoints/sid_local_lora/*
 /weights/
 /outputs/
 /results/
@@ -63,6 +65,10 @@ pip-log.txt
 *.ckpt
 *.tflite
 *.onnx
+
+# The deployed checkpoint is the sole versioned model artifact. It is tracked
+# through Git LFS; all training/smoke checkpoints remain ignored.
+!/checkpoints/sid_local_lora/sid_local_lora_best.pt
 
 # Logs and experiment tracking
 logs/
