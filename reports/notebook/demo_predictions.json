@@ -1,0 +1,146 @@
+[
+  {
+    "image_path": "demo_images/cifake_fake_0.jpg",
+    "pred": 0.8793890476226807
+  },
+  {
+    "image_path": "demo_images/cifake_fake_1.jpg",
+    "pred": 0.9909564852714539
+  },
+  {
+    "image_path": "demo_images/cifake_fake_2.jpg",
+    "pred": 0.0008748576510697603
+  },
+  {
+    "image_path": "demo_images/cifake_fake_3.jpg",
+    "pred": 0.9999409914016724
+  },
+  {
+    "image_path": "demo_images/cifake_fake_4.jpg",
+    "pred": 0.9999464750289917
+  },
+  {
+    "image_path": "demo_images/cifake_fake_5.jpg",
+    "pred": 1.0
+  },
+  {
+    "image_path": "demo_images/cifake_real_0.jpg",
+    "pred": 1.4664509535577963e-06
+  },
+  {
+    "image_path": "demo_images/cifake_real_1.jpg",
+    "pred": 0.012814933434128761
+  },
+  {
+    "image_path": "demo_images/cifake_real_2.jpg",
+    "pred": 0.0001629994803806767
+  },
+  {
+    "image_path": "demo_images/cifake_real_3.jpg",
+    "pred": 0.110580213367939
+  },
+  {
+    "image_path": "demo_images/cifake_real_4.jpg",
+    "pred": 0.5821307897567749
+  },
+  {
+    "image_path": "demo_images/cifake_real_5.jpg",
+    "pred": 0.011354989372193813
+  },
+  {
+    "image_path": "demo_images/sid_set_fake_0.jpg",
+    "pred": 0.9999998807907104
+  },
+  {
+    "image_path": "demo_images/sid_set_fake_1.jpg",
+    "pred": 0.9964859485626221
+  },
+  {
+    "image_path": "demo_images/sid_set_fake_2.jpg",
+    "pred": 0.9902507066726685
+  },
+  {
+    "image_path": "demo_images/sid_set_fake_3.jpg",
+    "pred": 0.03500651940703392
+  },
+  {
+    "image_path": "demo_images/sid_set_fake_4.jpg",
+    "pred": 0.9999997615814209
+  },
+  {
+    "image_path": "demo_images/sid_set_fake_5.jpg",
+    "pred": 0.9999991655349731
+  },
+  {
+    "image_path": "demo_images/sid_set_real_0.jpg",
+    "pred": 0.9999134540557861
+  },
+  {
+    "image_path": "demo_images/sid_set_real_1.jpg",
+    "pred": 4.413637725519948e-05
+  },
+  {
+    "image_path": "demo_images/sid_set_real_2.jpg",
+    "pred": 0.00013752251106780022
+  },
+  {
+    "image_path": "demo_images/sid_set_real_3.jpg",
+    "pred": 2.9393967260205045e-09
+  },
+  {
+    "image_path": "demo_images/sid_set_real_4.jpg",
+    "pred": 3.3548982969477947e-07
+  },
+  {
+    "image_path": "demo_images/sid_set_real_5.jpg",
+    "pred": 0.0038898454513400793
+  },
+  {
+    "image_path": "demo_images/wildfake_fake_0.jpg",
+    "pred": 0.99998939037323
+  },
+  {
+    "image_path": "demo_images/wildfake_fake_1.jpg",
+    "pred": 0.9999674558639526
+  },
+  {
+    "image_path": "demo_images/wildfake_fake_2.jpg",
+    "pred": 0.9998260140419006
+  },
+  {
+    "image_path": "demo_images/wildfake_fake_3.jpg",
+    "pred": 0.8501298427581787
+  },
+  {
+    "image_path": "demo_images/wildfake_fake_4.jpg",
+    "pred": 0.9997305274009705
+  },
+  {
+    "image_path": "demo_images/wildfake_fake_5.jpg",
+    "pred": 0.9537972807884216
+  },
+  {
+    "image_path": "demo_images/wildfake_real_0.jpg",
+    "pred": 0.0017561125569045544
+  },
+  {
+    "image_path": "demo_images/wildfake_real_1.jpg",
+    "pred": 6.372773420082467e-09
+  },
+  {
+    "image_path": "demo_images/wildfake_real_2.jpg",
+    "pred": 5.005747483188827e-10
+  },
+  {
+    "image_path": "demo_images/wildfake_real_3.jpg",
+    "pred": 8.086846719379537e-06
+  },
+  {
+    "image_path": "demo_images/wildfake_real_4.jpg",
+    "pred": 4.5463591225036737e-10
+  },
+  {
+    "image_path": "demo_images/wildfake_real_5.jpg",
+    "pred": 1.5424625611804867e-15
+  }
+]

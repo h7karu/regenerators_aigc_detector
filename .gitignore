@@ -30,9 +30,13 @@ pip-log.txt
 .ipynb_checkpoints
 *.ipynb
 !notebooks/demo.ipynb
+!notebooks/results.ipynb
 
 # VSCode
 .vscode/
+
+# Claude Code local (personal) settings
+.claude/settings.local.json
 
 # IDEs
 .idea/
@@ -55,6 +59,7 @@ pip-log.txt
 /outputs/
 /results/
 /predictions/
+/predictions.json
 /reports/metrics/smoke_*.json
 
 # Large binary files

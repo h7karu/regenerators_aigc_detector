@@ -1,12 +1,54 @@
 # Regenerators AIGC Detector
 
-An experimental image-forensics detector built with a LoRA-adapted Swin-Tiny
-RGB backbone and a learned Fourier-phase branch. The deployed model was
-initialized on CIFAKE, then fine-tuned on a balanced 40,000-image SID subset
-covering real, fully synthetic, and tampered images.
+Detecting AI-generated and AI-tampered images from pixels alone.
+
+Given an image, the detector returns a score for how likely it is to be
+AI-generated. It addresses two cases together: fully synthetic images, and real
+photographs whose contents have been locally edited or tampered. The trained
+model ships with a Gradio web interface, a directory-to-JSON CLI, and a
+reusable inference module.
 
 The detector is research software. Its score is not a calibrated probability
 or proof of image provenance.
+
+## Contents
+
+- [Approach](#approach)
+- [Final model results](#final-model-results)
+- [Run the trained model on another machine](#run-the-trained-model-on-another-machine)
+  — setup and installation
+- [Contributor setup](#contributor-setup)
+- [Repository layout](#repository-layout)
+- [Reproduce the reported results](#reproduce-the-reported-results)
+  — the end-to-end training and evaluation path
+- [Evaluate the frozen checkpoint](#evaluate-the-frozen-checkpoint)
+- [Limitations and future work](#limitations-and-future-work)
+- [Team member contributions](#team-member-contributions)
+
+## Approach
+
+The model fuses two complementary views of the same image:
+
+- **RGB semantic branch** — a Swin-Tiny backbone
+  (`swin_tiny_patch4_window7_224`) adapted with LoRA on its attention
+  projections (`attn.qkv`, `attn.proj`). LoRA keeps the trained parameter count
+  small, which is what made a two-stage fine-tune affordable on a single
+  consumer GPU.
+- **Fourier-phase branch** — a compact CNN over six-channel sine/cosine maps of
+  the FFT phase spectrum. Generators leave periodic upsampling and resampling
+  traces in the frequency domain that are not apparent in RGB space and that
+  survive many local edits.
+
+Training ran in two stages: initialization on CIFAKE, then fine-tuning on a
+balanced 40,000-image SID-Set subset covering real, fully synthetic, and
+tampered images. Each training step pairs a clean view with a degraded view
+under a robustness loss, so the objective rewards agreement under JPEG, blur,
+resize, and noise rather than accuracy on pristine images alone. Checkpoints
+are selected by mean AUROC across a seven-condition validation policy, with
+worst-condition AUROC breaking ties.
+
+At inference, the default policy applies deterministic five-view test-time
+augmentation and combines the resulting logits with a trimmed mean.
 
 ## Final model results
 
@@ -21,6 +63,19 @@ mean of model logits. Across the complete held-out degradation suite, mean
 AUROC is 0.9359 and the worst condition is `blur_2.0` at 0.9049 AUROC. See
 `reports/metrics/sid_local_lora_tta_test_robustness.json` for all conditions and
 `reports/metrics/inference_policy_validation.json` for policy selection.
+
+**[notebooks/results.ipynb](notebooks/results.ipynb)** walks through these
+results with rendered plots: cross-domain transfer (why SID adaptation was
+needed), robustness curves under JPEG/blur/resize/noise, per-generator accuracy
+(fully-synthetic vs. locally-tampered images), the test-time-augmentation gain,
+and the confident-error cases. It also carries a 200-image branch ablation from
+an earlier CLIP-plus-forensic design, retained as a record of that exploration
+rather than as a measurement of the deployed model.
+
+The notebook loads no checkpoint and runs no inference — it reads the JSON and
+CSV under `reports/` and finishes in seconds. Outputs are saved in the
+notebook, so it renders directly on GitHub without being executed. Figures
+whose inputs are absent from a given clone print a note and skip.
 
 Configuration: `configs/sid_local_lora.yaml`
 
@@ -252,7 +307,7 @@ python -m pytest -q
 
 ```text
 configs/                Training and inference configurations
-notebooks/              Hosted demo notebook
+notebooks/              Hosted demo notebook and a rendered results walkthrough
 scripts/                Setup, data preparation, and GPU helpers
 tests/                  Automated tests
 ARTIFACTS.md            External artifact locations and checksums
@@ -276,6 +331,40 @@ Generated `data/`, `logs/`, `models/`, and training-checkpoint files are ignored
 by Git. The deployed SID checkpoint is the sole LFS-managed checkpoint
 exception. Selected reproducible metric reports under `reports/metrics/` are
 versioned with the source.
+
+## Reproduce the reported results
+
+The numbers in [Final model results](#final-model-results) come from the
+end-to-end path below. Steps 2 and 4 need an NVIDIA GPU; the evaluation in step
+5 runs on CPU. The stage-2 SID fine-tune dominates the wall-clock cost.
+
+| # | Step | Where | Produces |
+| --- | --- | --- | --- |
+| 1 | Build CIFAKE manifests | [Prepare CIFAKE for training](#prepare-cifake-for-training) | `data/manifests/cifake_*.csv` |
+| 2 | Stage-1 CIFAKE training | [Train or resume the final configuration](#train-or-resume-the-final-configuration) | `checkpoints/full_cifake_lora/full_cifake_lora_best.pt` |
+| 3 | Build the balanced SID subset and splits | [Faster local SID training](#faster-local-sid-training) | `data/manifests/sid_*.csv` |
+| 4 | Stage-2 SID fine-tune | [Faster local SID training](#faster-local-sid-training) | `checkpoints/sid_local_lora/sid_local_lora_best.pt` |
+| 5 | Robustness evaluation | [Evaluate the frozen checkpoint](#evaluate-the-frozen-checkpoint) | `reports/metrics/sid_local_lora_tta_test_robustness.json` |
+
+Step 3 has an alternative: `configs/sid_streaming_lora.yaml` streams SID-Set
+from Hugging Face without persisting images. See
+[Stream SID-Set without storing images](#stream-sid-set-without-storing-images).
+
+Each reported value traces to a committed artifact:
+
+| Reported value | Artifact |
+| --- | --- |
+| Model-selection TTA row (0.9484 AUROC) and the 0.4856 threshold | `reports/metrics/inference_policy_validation.json` |
+| Holdout clean row (0.9474 AUROC), the 0.9359 mean, and `blur_2.0` at 0.9049 | `reports/metrics/sid_local_lora_tta_test_robustness.json` |
+| Single-view holdout comparison (0.9427 AUROC, no TTA) | `reports/metrics/sid_local_lora_test_robustness.json` |
+| Pre-fine-tune transfer baselines | `reports/metrics/pre_sid_cifake_robustness.json`, `reports/metrics/pre_sid_sid_holdout_robustness.json` |
+
+To read the results without retraining anything, open
+[notebooks/results.ipynb](notebooks/results.ipynb), which uses these files
+directly.
+
+Seeds and split construction are deterministic, but exact floating-point values
+can still shift across a different GPU, driver, or PyTorch build.
 
 ## Prepare CIFAKE for training
 
@@ -419,13 +508,62 @@ The evaluator shares the deployed SID defaults and TTA policy. Use
 `--transform clean` instead of `--all-transforms` for a quick clean-only
 evaluation, or `--single-view` to measure the checkpoint without TTA.
 
-## Limitations
+## Limitations and future work
 
-- SID and CIFAKE still cover a limited generator and manipulation distribution.
+### Limitations
+
+- SID and CIFAKE cover a limited generator and manipulation distribution. Both
+  stages saw a fixed set of generators, so nothing here demonstrates transfer
+  to architectures released after that data was collected.
 - Generalisation to arbitrary generators, edits, screenshots, and social-media
   processing has not been established.
-- The validation-selected threshold may need recalibration for other data.
-- Pixel-only detection is supporting evidence, not definitive provenance.
+- The validation-selected threshold may need recalibration for other data. The
+  output is a decision score, not a calibrated probability.
+- `blur_2.0` is the weakest condition at 0.9049 AUROC, and `resize_0.25` is
+  second at 0.9181. Both destroy the high-frequency evidence the phase branch
+  depends on, which is a structural weakness of the design rather than a
+  tuning problem.
+- On the SID holdout, 15.8% of real images are still flagged at the deployed
+  threshold (89.4% of AI images are caught). Wherever a false accusation is
+  costly, that false-positive rate is the binding constraint, not AUROC.
+- Pixel-only detection is supporting evidence, not definitive provenance. The
+  model cannot see C2PA signatures, EXIF, or distribution context.
+
+### What we would improve with more time
+
+- **Wider generator coverage.** Train and evaluate across additional sources —
+  WildFake, and diffusion families absent from SID — to measure the
+  cross-generator gap directly instead of assuming it.
+  `scripts/build_wildfake_manifest.py` and
+  `configs/multisource_phase_robust.yaml` are the groundwork already in place.
+- **Calibration.** Fit temperature scaling or isotonic regression on a held-out
+  split so the score reads as a probability, and report expected calibration
+  error next to AUROC.
+- **Localization.** SID-Set ships tampering masks that the current pipeline
+  discards before decoding. Predicting *where* an image was edited would be far
+  more actionable than a single image-level score, and the masks to supervise
+  it are already there.
+- **Ablate the deployed architecture.** The ablation artifacts in the results
+  notebook probe an earlier CLIP-plus-forensic design at 200 images. An
+  RGB-only / phase-only / fused comparison on the deployed model at the full
+  2,000-image evaluation size would establish what the phase branch actually
+  contributes.
+- **Blur and downscale robustness.** Add scale-aware augmentation and
+  multi-resolution inference to recover the loss at `blur_2.0` and
+  `resize_0.25`.
+- **Inference cost.** Five-view TTA multiplies cost by five for a modest gain
+  (0.9427 to 0.9474 AUROC on the holdout). Distilling the TTA ensemble into a
+  single forward pass would make deployment substantially cheaper.
+
+## Team member contributions
+
+| Member | Contribution |
+| --- | --- |
+| Zechary Chua | _TBD_ |
+| Isaac Teo | _TBD_ |
+| Wei Tianyue | _TBD_ |
+| Tan Jie En, Nigel | _TBD_ |
+| Kawaguchi Hikaru | _TBD_ |
 
 ## Contributing
 
