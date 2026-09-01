@@ -559,10 +559,10 @@ evaluation, or `--single-view` to measure the checkpoint without TTA.
 
 | Member | Contribution |
 | --- | --- |
-| Zechary Chua | _TBD_ |
-| Isaac Teo | _TBD_ |
-| Wei Tianyue | _TBD_ |
-| Tan Jie En, Nigel | _TBD_ |
+| Zechary Chua | _Data preparation and augmentation._ |
+| Isaac Teo | _Integration testing, ensuring the setup and installation works end to end, and editing the demo video._ |
+| Wei Tianyue | _Consulting research papers, test models, write project description and refining the README._ |
+| Tan Jie En, Nigel | _Developing the final submission model and doing up the gradio UI._ |
 | Kawaguchi Hikaru | _Refined the final UI, recorded the live demo and wrote the robustness evaluation summary and error analysis note. Aided in research and implementing other models to compare against._ |
 
 ## Contributing
