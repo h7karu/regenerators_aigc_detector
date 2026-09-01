@@ -563,7 +563,9 @@ evaluation, or `--single-view` to measure the checkpoint without TTA.
 | Isaac Teo | _TBD_ |
 | Wei Tianyue | _TBD_ |
 | Tan Jie En, Nigel | _TBD_ |
-| Kawaguchi Hikaru | _TBD_ |
+| Kawaguchi Hikaru | _Refined the final UI, recorded the live demo and wrote the 
+robustness evaluation summary and error analysis note. Aided in research and 
+implementing other models to compare against._ |
 
 ## Contributing
 
